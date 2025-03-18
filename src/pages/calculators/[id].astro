@@ -1,20 +1,14 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import Calculator from '../../components/Calculator.astro';
-import { operooConfig } from '../../configs/operoo';
-import { templateConfig } from '../../configs/template';
-
-// Map of all available calculators
-const calculatorMap = {
-  [operooConfig.id]: operooConfig,
-  [templateConfig.id]: templateConfig,
-  // Add new calculators here as they're created
-};
+import { calculatorMap } from '../../data/calculators';
 
 export function getStaticPaths() {
-  return Object.keys(calculatorMap).map(id => ({
+  const paths = Object.keys(calculatorMap).map(id => ({
     params: { id }
   }));
+  console.log('Generated Paths:', paths); // Helpful for debugging
+  return paths;
 }
 
 const { id } = Astro.params;
@@ -37,4 +31,4 @@ if (!calculator) {
 
     <Calculator config={calculator} />
   </div>
-</SiteLayout> 
+</SiteLayout>

@@ -1,15 +1,8 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
-import { operooConfig } from '../../configs/operoo';
-// Import all calculator configs here
-import { templateConfig } from '../../configs/template';
+import { calculatorMap } from '../../data/calculators';
 
-// Collect all calculator configs
-const calculators = [
-  operooConfig,
-  templateConfig,
-  // Add new calculators here as they're created
-].filter(calc => calc.id && calc.name); // Only show valid calculators
+const calculators = Object.values(calculatorMap).filter(calc => calc.id && calc.name);
 ---
 
 <SiteLayout title="Calculator Directory">
@@ -29,4 +22,4 @@ const calculators = [
       ))}
     </div>
   </div>
-</SiteLayout> 
+</SiteLayout>
