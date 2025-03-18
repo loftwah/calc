@@ -8,6 +8,9 @@ export default defineConfig({
   output: 'static',
   site: 'https://calc.deanlofts.xyz',
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
+    server: {
+      cors: true
+    }
   }
 });
