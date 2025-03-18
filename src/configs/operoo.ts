@@ -82,13 +82,9 @@ export const operooConfig = {
       id: "totalCost",
       label: "Total",
       isTotal: true,
-      formula: `
-        const paperCost = (inputs.students * inputs.pagesStudent) * 0.014;
-        const printingCost = (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012;
-        const maintenanceCost = ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395;
-        const postageCost = (inputs.students * inputs.mailoutsStudent) * 0.5;
-        return paperCost + printingCost + maintenanceCost + postageCost;
-      `
+      // For the total cost formula, don't use a multi-line template literal,
+      // but put everything on one line to work with the function converter
+      formula: "(function(inputs) { const paperCost = (inputs.students * inputs.pagesStudent) * 0.014; const printingCost = (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012; const maintenanceCost = ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395; const postageCost = (inputs.students * inputs.mailoutsStudent) * 0.5; return paperCost + printingCost + maintenanceCost + postageCost; })(inputs)"
     }
   ],
   allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com", "localhost"]

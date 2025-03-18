@@ -39,7 +39,17 @@
           if (config.elements) {
             config.elements.forEach(element => {
               if (element.type === 'result' && typeof element.formula === 'string') {
-                element.formula = new Function('inputs', 'return ' + element.formula);
+                // Check if the formula is already wrapped in a function
+                if (element.formula.trim().startsWith('(function')) {
+                  // For IIFE style functions, wrap in a new function that returns the result
+                  element.formula = new Function('inputs', 'return ' + element.formula);
+                } else if (element.formula.includes('return')) {
+                  // For multi-line functions with return statements
+                  element.formula = new Function('inputs', element.formula);
+                } else {
+                  // For simple expressions
+                  element.formula = new Function('inputs', 'return ' + element.formula);
+                }
               }
             });
           }
@@ -157,7 +167,17 @@
           if (config.elements) {
             config.elements.forEach(element => {
               if (element.type === 'result' && typeof element.formula === 'string') {
-                element.formula = new Function('inputs', 'return ' + element.formula);
+                // Check if the formula is already wrapped in a function
+                if (element.formula.trim().startsWith('(function')) {
+                  // For IIFE style functions, wrap in a new function that returns the result
+                  element.formula = new Function('inputs', 'return ' + element.formula);
+                } else if (element.formula.includes('return')) {
+                  // For multi-line functions with return statements
+                  element.formula = new Function('inputs', element.formula);
+                } else {
+                  // For simple expressions
+                  element.formula = new Function('inputs', 'return ' + element.formula);
+                }
               }
             });
           }
