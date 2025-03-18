@@ -1,0 +1,16 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  value: number;
+}
+
+const { id, label, value = 0 } = Astro.props;
+---
+
+<div class="mb-4 p-4 bg-white rounded-lg shadow">
+  <label class="text-sm font-medium text-gray-700">{label}</label>
+  <div class="mt-1 text-2xl font-bold text-indigo-600" id={`${id}-result`}>
+    ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+  </div>
+</div> 

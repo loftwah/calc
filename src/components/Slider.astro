@@ -1,0 +1,51 @@
+---
+interface Props {
+  id: string;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  default: number;
+  description?: string;
+}
+
+const { id, label, min, max, step, default: defaultValue, description } = Astro.props;
+---
+
+<div class="mb-6">
+  <label for={id} class="block text-sm font-medium text-gray-700 mb-1">
+    {label}
+  </label>
+  {description && (
+    <p class="text-sm text-gray-500 mb-2">{description}</p>
+  )}
+  <div class="flex items-center gap-4">
+    <input
+      type="range"
+      id={id}
+      name={id}
+      min={min}
+      max={max}
+      step={step}
+      value={defaultValue}
+      class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+    />
+    <span class="text-sm font-medium text-gray-700 min-w-[4rem]" id={`${id}-value`}>
+      {defaultValue}
+    </span>
+  </div>
+</div>
+
+<script define:vars={{ id }}>
+  const slider = document.getElementById(id);
+  const output = document.getElementById(`${id}-value`);
+  
+  slider.addEventListener('input', function() {
+    output.textContent = this.value;
+    // Dispatch custom event for calculator
+    slider.dispatchEvent(new CustomEvent('calculator-update', {
+      bubbles: true,
+      detail: { id, value: Number(this.value) }
+    }));
+  });
+</script> 

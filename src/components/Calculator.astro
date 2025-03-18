@@ -1,0 +1,79 @@
+---
+import { operooConfig } from '../configs/operoo';
+import Slider from './Slider.astro';
+import Result from './Result.astro';
+---
+
+<div class="max-w-2xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
+  <h2 class="text-2xl font-bold text-gray-900 mb-6">Cost Savings Calculator</h2>
+  
+  <div class="space-y-6">
+    {operooConfig.elements.map((element) => (
+      element.type === 'slider' ? (
+        <Slider
+          id={element.id}
+          label={element.label}
+          min={element.min}
+          max={element.max}
+          step={element.step}
+          default={element.default}
+          description={element.description}
+        />
+      ) : null
+    ))}
+  </div>
+
+  <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+    <Result id="paperCost" label="Paper Cost" value={0} />
+    <Result id="printingCost" label="Printing Cost" value={0} />
+    <Result id="maintenanceCost" label="Maintenance Cost" value={0} />
+    <Result id="postageCost" label="Postage Cost" value={0} />
+    <Result id="totalCost" label="Total Cost" value={0} />
+  </div>
+</div>
+
+<script>
+  function calculateResults(values) {
+    const paperCost = values.students * values.pagesStudent * 0.014;
+    const printingCost = (values.students * values.pagesStudent + values.staff * values.pagesStaff) * 0.012;
+    const maintenanceCost = ((values.students * values.pagesStudent + values.staff * values.pagesStaff) / 50000) * 395;
+    const postageCost = values.students * values.mailoutsStudent * 0.5;
+    const totalCost = paperCost + printingCost + maintenanceCost + postageCost;
+
+    return { paperCost, printingCost, maintenanceCost, postageCost, totalCost };
+  }
+
+  // Initialize values object with defaults
+  const values = {};
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    values[slider.id] = Number(slider.value);
+  });
+
+  // Update results when sliders change
+  document.addEventListener('calculator-update', (event) => {
+    values[event.detail.id] = event.detail.value;
+    const results = calculateResults(values);
+    
+    Object.entries(results).forEach(([key, value]) => {
+      const element = document.getElementById(`${key}-result`);
+      if (element) {
+        element.textContent = `$${value.toLocaleString('en-US', { 
+          minimumFractionDigits: 2, 
+          maximumFractionDigits: 2 
+        })}`;
+      }
+    });
+  });
+
+  // Calculate initial results
+  const initialResults = calculateResults(values);
+  Object.entries(initialResults).forEach(([key, value]) => {
+    const element = document.getElementById(`${key}-result`);
+    if (element) {
+      element.textContent = `$${value.toLocaleString('en-US', { 
+        minimumFractionDigits: 2, 
+        maximumFractionDigits: 2 
+      })}`;
+    }
+  });
+</script> 
