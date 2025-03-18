@@ -21,60 +21,6 @@ const operooCalc = calculatorMap['operoo'];
 			<p class="mt-4 text-gray-600">Add this code to any page where you want the calculator to appear.</p>
 		</section>
 
-		<section class="bg-white p-6 rounded-lg shadow-sm">
-			<h2 class="text-xl font-semibold mb-6">Live Demo</h2>
-			<div class="bg-gray-50 p-8 rounded-xl">
-				<div class="space-y-6">
-					{operooCalc.elements.map(element => {
-						if (element.type === 'slider') {
-							return (
-								<div class="form-group">
-									<label for={element.id}>{element.label}</label>
-									<input 
-										type="range"
-										id={element.id}
-										min={element.min}
-										max={element.max}
-										step={element.step}
-										value={element.default}
-									/>
-									<div class="slider-labels">
-										<span>{element.min}</span>
-										<output>{element.default}</output>
-										<span>{element.max}</span>
-									</div>
-									{element.description && <p class="description">{element.description}</p>}
-								</div>
-							);
-						}
-					})}
-
-					<div class="results">
-						<div class="flex justify-between">
-							<span>Paper Cost</span>
-							<span id="paperCost">$0.00</span>
-						</div>
-						<div class="flex justify-between">
-							<span>Printing Cost</span>
-							<span id="printingCost">$0.00</span>
-						</div>
-						<div class="flex justify-between">
-							<span>Maintenance Cost</span>
-							<span id="maintenanceCost">$0.00</span>
-						</div>
-						<div class="flex justify-between">
-							<span>Postage Cost</span>
-							<span id="postageCost">$0.00</span>
-						</div>
-						<div class="flex justify-between">
-							<span class="font-bold">Total Cost</span>
-							<span id="totalCost" class="font-bold">$0.00</span>
-						</div>
-					</div>
-				</div>
-			</div>
-		</section>
-
 		<section class="bg-white p-6 rounded-lg shadow">
 			<h2 class="text-xl font-semibold mb-4">Available Calculators</h2>
 			<ul class="list-disc list-inside space-y-2 text-gray-600">
@@ -98,4 +44,3 @@ const operooCalc = calculatorMap['operoo'];
 </SiteLayout>
 
 <link rel="stylesheet" href="/calculator.css" />
-<script is:inline src="/calculator.js"></script>

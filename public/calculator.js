@@ -94,64 +94,69 @@
   }
 
   function renderElements(elements) {
-    const sliders = elements
-      .filter(element => element.type === 'slider')
-      .map(element => renderSlider(element))
-      .join('');
-
-    const results = `
-      <div class="results">
-        ${elements
-          .filter(element => element.type === 'result')
-          .map(element => renderResult(element))
-          .join('')}
-      </div>
-    `;
-
-    return sliders + results;
+    return elements.map(element => {
+      if (element.type === 'slider') {
+        return renderSlider(element);
+      } else if (element.type === 'result') {
+        return renderResult(element);
+      }
+      return '';
+    }).join('');
   }
 
   function initializeCalculations(container, config) {
-    function calculateResults() {
-      // Get all slider values
-      const inputs = {};
-      config.elements
-        .filter(element => element.type === 'slider')
-        .forEach(element => {
-          inputs[element.id] = parseInt(container.querySelector(`#${element.id}`)?.value) || 0;
-        });
-
-      // Calculate and update all results
-      config.elements
-        .filter(element => element.type === 'result')
-        .forEach(element => {
-          const result = element.formula(inputs);
-          container.querySelector(`#${element.id}`).textContent = '$' + result.toFixed(2);
-        });
-    }
-
-    function updateSliderBackground(slider) {
-      const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
-      slider.style.backgroundSize = `${value}% 100%`;
-    }
-
-    container.querySelectorAll('input[type="range"]').forEach(slider => {
-      // Initialize the background size
-      updateSliderBackground(slider);
-      
+    // Setup input event listeners
+    const sliders = container.querySelectorAll('input[type="range"]');
+    
+    sliders.forEach(slider => {
+      // Update displayed value when slider changes
       slider.addEventListener('input', function() {
-        // Update the output value
-        const valueDisplay = this.parentElement.nextElementSibling.querySelector('.current-value');
+        const valueDisplay = this.closest('.slider-header').querySelector('.current-value');
         if (valueDisplay) {
           valueDisplay.textContent = this.value;
         }
-        // Update the slider fill
-        updateSliderBackground(this);
-        calculateResults();
+        
+        // Recalculate all values
+        calculateResults(container, config);
       });
+      
+      // Initial calculation
+      slider.dispatchEvent(new Event('input'));
     });
+  }
 
-    calculateResults();
+  function calculateResults(container, config) {
+    // Get all input values
+    const inputs = {};
+    container.querySelectorAll('input[type="range"]').forEach(input => {
+      inputs[input.id] = parseFloat(input.value);
+    });
+    
+    // Apply calculations from config
+    config.elements
+      .filter(element => element.type === 'result')
+      .forEach(result => {
+        let value = 0;
+        
+        if (result.formula) {
+          try {
+            // Call the formula function with inputs
+            value = result.formula(inputs);
+          } catch (error) {
+            console.error('Calculation error:', error);
+          }
+        }
+        
+        // Format as currency and update DOM
+        const element = container.querySelector(`#${result.id}`);
+        if (element) {
+          element.textContent = formatCurrency(value);
+        }
+      });
+  }
+
+  function formatCurrency(value) {
+    return '$' + value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   }
 
   // Initialize when DOM is ready
@@ -160,4 +165,7 @@
   } else {
     initCalculator();
   }
+  
+  // Also listen for our custom event
+  document.addEventListener('calculatorInit', initCalculator);
 })(); 
