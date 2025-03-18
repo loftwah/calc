@@ -26,288 +26,273 @@
     
     for (const container of containers) {
       try {
-        // Get calculator config from data attribute if available
+        // Get calculator config
+        const configType = container.getAttribute('data-config');
         const configData = container.getAttribute('data-calculator');
         let config;
         
         if (configData) {
-          // Use embedded config
+          // Use embedded config if available
           config = JSON.parse(configData);
-        } else {
-          // Fallback to fetching config (for embedded widget use)
-          const configType = container.getAttribute('data-config');
+          
+          // After parsing, we need to reconstruct the formula functions
+          if (config.elements) {
+            config.elements.forEach(element => {
+              if (element.type === 'result' && typeof element.formula === 'string') {
+                element.formula = new Function('inputs', 'return ' + element.formula);
+              }
+            });
+          }
+        } else if (configType === 'operoo') {
+          // Hardcoded Operoo config for reliable operation
+          config = {
+            id: 'operoo',
+            name: 'Operoo Cost Calculator',
+            description: 'Calculate costs related to Operoo usage in schools',
+            elements: [
+              {
+                type: "slider",
+                id: "students",
+                label: "Number of Students",
+                min: 0,
+                max: 3000,
+                step: 1,
+                default: 1000,
+                description: "Total number of students in the school"
+              },
+              {
+                type: "slider",
+                id: "pagesStudent",
+                label: "Pages per Student",
+                min: 0,
+                max: 500,
+                step: 1,
+                default: 100,
+                description: "Includes registration, consent forms, handbooks, policies, agreements..."
+              },
+              {
+                type: "slider",
+                id: "mailoutsStudent",
+                label: "Mailouts per Student",
+                min: 0,
+                max: 50,
+                step: 1,
+                default: 10,
+                description: "Letters via mail. Most schools conduct about 18 mail-outs per year."
+              },
+              {
+                type: "slider",
+                id: "staff",
+                label: "Number of Staff",
+                min: 0,
+                max: 300,
+                step: 1,
+                default: 50,
+                description: "Total number of staff members"
+              },
+              {
+                type: "slider",
+                id: "pagesStaff",
+                label: "Pages per Staff",
+                min: 0,
+                max: 500,
+                step: 1,
+                default: 100,
+                description: "Includes HR forms, contracts, policies, agreements, etc."
+              },
+              {
+                type: "result",
+                id: "paperCost",
+                label: "Paper Costs @ 1.4c per page",
+                formula: function(inputs) { 
+                  return (inputs.students * inputs.pagesStudent) * 0.014; 
+                }
+              },
+              {
+                type: "result",
+                id: "printingCost",
+                label: "Printing/Toner Costs @ 1.2c per page",
+                formula: function(inputs) { 
+                  return (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012; 
+                }
+              },
+              {
+                type: "result",
+                id: "maintenanceCost",
+                label: "Printer/Copier Maintenance @ $395 service fee every 50,000 copies",
+                formula: function(inputs) { 
+                  return ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395; 
+                }
+              },
+              {
+                type: "result",
+                id: "postageCost",
+                label: "Postage Costs @ 50c per mailout",
+                formula: function(inputs) { 
+                  return (inputs.students * inputs.mailoutsStudent) * 0.5; 
+                }
+              },
+              {
+                type: "result",
+                id: "totalCost",
+                label: "Total",
+                isTotal: true,
+                formula: function(inputs) {
+                  const paperCost = (inputs.students * inputs.pagesStudent) * 0.014;
+                  const printingCost = (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012;
+                  const maintenanceCost = ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395;
+                  const postageCost = (inputs.students * inputs.mailoutsStudent) * 0.5;
+                  return paperCost + printingCost + maintenanceCost + postageCost;
+                }
+              }
+            ],
+            allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com", "localhost"]
+          };
+        } else if (configType) {
+          // Try to fetch from server for other configs
           const response = await fetch(`https://calc.deanlofts.xyz/calculators/${configType}`);
-          const data = await response.json();
-          config = data;
+          config = await response.json();
+          
+          // Reconstruct formula functions here too
+          if (config.elements) {
+            config.elements.forEach(element => {
+              if (element.type === 'result' && typeof element.formula === 'string') {
+                element.formula = new Function('inputs', 'return ' + element.formula);
+              }
+            });
+          }
+        } else {
+          throw new Error("No calculator configuration found");
         }
         
         // Render calculator based on config
-        renderCalculator(container, config);
-        initializeCalculations(container, config);
+        container.innerHTML = renderCalculator(config);
+        
+        // Setup event listeners and initial calculations
+        setupCalculator(container, config);
+        
       } catch (error) {
         console.error('Failed to load calculator:', error);
-        container.innerHTML = '<p>Failed to load calculator</p>';
+        container.innerHTML = '<div style="color: red; padding: 20px;">Failed to load calculator: ' + error.message + '</div>';
       }
     }
 
     window.SchoolStatusCalculator.initialized = true;
   }
 
-  function renderCalculator(container, config) {
-    // Render HTML based on config elements
-    const html = `
+  function renderCalculator(config) {
+    let html = `
       <div class="calculator-widget">
         <h1>${config.name}</h1>
         <p class="subtitle">${config.description}</p>
-        ${renderInputElements(config.elements)}
-        ${renderResultElements(config.elements)}
-      </div>
     `;
-    container.innerHTML = html;
-  }
-
-  function renderInputElements(elements) {
-    return elements
-      .filter(element => element.type !== 'result')
-      .map(element => {
-        if (element.type === 'slider') {
-          return renderSlider(element);
-        } else if (element.type === 'list') {
-          return renderDropdown(element);
-        } else if (element.type === 'checkbox') {
-          return renderCheckbox(element);
-        } else if (element.type === 'radio') {
-          return renderRadio(element);
-        } else if (element.type === 'field') {
-          return renderField(element);
-        } else if (element.type === 'text') {
-          return renderText(element);
-        }
-        return '';
-      }).join('');
-  }
-
-  function renderResultElements(elements) {
-    const resultElements = elements.filter(element => element.type === 'result');
     
-    if (resultElements.length === 0) return '';
-    
-    return `
-      <div class="results">
-        ${resultElements.map(element => renderResult(element)).join('')}
-      </div>
-    `;
-  }
-
-  function renderSlider(element) {
-    return `
-      <div class="input-group slider-group" data-element-id="${element.id}">
-        <label for="${element.id}">${element.label}</label>
-        ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
-        <div class="range-input">
-          <input 
-            type="range"
-            id="${element.id}"
-            min="${element.min}"
-            max="${element.max}"
-            step="${element.step}"
-            value="${element.default}"
-          />
-        </div>
-        <div class="range-values">
-          <span>${element.min}</span>
-          <span class="current-value" id="${element.id}-value">${element.default}</span>
-          <span>${element.max}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderDropdown(element) {
-    return `
-      <div class="input-group">
-        <label for="${element.id}">${element.label}</label>
-        ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
-        <select id="${element.id}">
-          ${element.options.map(option => `
-            <option value="${option.value}">${option.label}</option>
-          `).join('')}
-        </select>
-      </div>
-    `;
-  }
-
-  function renderCheckbox(element) {
-    return `
-      <div class="input-group">
-        <label for="${element.id}">${element.label}</label>
-        ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
-        <div class="checkbox-wrapper">
-          <input type="checkbox" id="${element.id}" />
-          <span>${element.label}</span>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderRadio(element) {
-    return `
-      <div class="input-group">
-        <label>${element.label}</label>
-        ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
-        <div class="radio-group">
-          ${element.options.map((option, index) => `
-            <div class="radio-option">
+    // Add input controls
+    config.elements.forEach(element => {
+      if (element.type === 'slider') {
+        html += `
+          <div class="input-group">
+            <label for="${element.id}">${element.label}</label>
+            ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
+            <div class="range-input">
               <input 
-                type="radio" 
-                id="${element.id}_${index}" 
-                name="${element.id}" 
-                value="${option.value}"
-                ${index === 0 ? 'checked' : ''}
+                type="range"
+                id="${element.id}"
+                min="${element.min}"
+                max="${element.max}"
+                step="${element.step}"
+                value="${element.default}"
               />
-              <span>${option.label}</span>
             </div>
-          `).join('')}
-        </div>
-      </div>
-    `;
-  }
-
-  function renderField(element) {
-    return `
-      <div class="input-group">
-        <label for="${element.id}">${element.label}</label>
-        ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
-        <input type="number" id="${element.id}" value="${element.default || 0}" />
-      </div>
-    `;
-  }
-
-  function renderText(element) {
-    return `
-      <div class="input-group">
-        <label>${element.label}</label>
-        <div class="text-element">
-          <p>${element.description || ''}</p>
-        </div>
-      </div>
-    `;
-  }
-
-  function renderResult(element) {
-    return `
-      <div class="cost-line ${element.isTotal ? 'total' : ''}">
-        <span>${element.label}</span>
-        <span id="${element.id}">$0.00</span>
-      </div>
-    `;
-  }
-
-  function initializeCalculations(container, config) {
-    // Setup input event listeners
-    const sliders = container.querySelectorAll('input[type="range"]');
-    const selects = container.querySelectorAll('select');
-    const checkboxes = container.querySelectorAll('input[type="checkbox"]');
-    const radios = container.querySelectorAll('input[type="radio"]');
-    const fields = container.querySelectorAll('input[type="number"]');
-    
-    // Add event listeners to all input types
-    sliders.forEach(slider => {
-      slider.addEventListener('input', function() {
-        const valueDisplay = container.querySelector(`#${this.id}-value`);
-        if (valueDisplay) {
-          valueDisplay.textContent = this.value;
-        }
-        calculateResults(container, config);
-      });
-      
-      // Trigger initial value display
-      const valueDisplay = container.querySelector(`#${slider.id}-value`);
-      if (valueDisplay) {
-        valueDisplay.textContent = slider.value;
+            <div class="range-values">
+              <span>${element.min}</span>
+              <span class="current-value" id="${element.id}-value">${element.default}</span>
+              <span>${element.max}</span>
+            </div>
+          </div>
+        `;
       }
     });
     
-    selects.forEach(select => {
-      select.addEventListener('change', () => calculateResults(container, config));
+    // Add results section
+    html += '<div class="results">';
+    
+    config.elements.forEach(element => {
+      if (element.type === 'result') {
+        html += `
+          <div class="cost-line ${element.isTotal ? 'total' : ''}">
+            <span>${element.label}</span>
+            <span id="${element.id}">$0.00</span>
+          </div>
+        `;
+      }
     });
     
-    checkboxes.forEach(checkbox => {
-      checkbox.addEventListener('change', () => calculateResults(container, config));
-    });
+    html += '</div></div>';
     
-    radios.forEach(radio => {
-      radio.addEventListener('change', () => calculateResults(container, config));
-    });
+    return html;
+  }
+
+  function setupCalculator(container, config) {
+    const widget = container.querySelector('.calculator-widget');
     
-    fields.forEach(field => {
-      field.addEventListener('input', () => calculateResults(container, config));
+    // Initialize slider displays
+    widget.querySelectorAll('input[type="range"]').forEach(slider => {
+      const valueDisplay = widget.querySelector(`#${slider.id}-value`);
+      if (valueDisplay) {
+        valueDisplay.textContent = slider.value;
+      }
+      
+      // Add event listener
+      slider.addEventListener('input', function() {
+        if (valueDisplay) {
+          valueDisplay.textContent = this.value;
+        }
+        calculateAndDisplay(widget, config);
+      });
     });
     
     // Initial calculation
-    calculateResults(container, config);
+    calculateAndDisplay(widget, config);
   }
 
-  function calculateResults(container, config) {
-    // Get all input values
+  function calculateAndDisplay(widget, config) {
+    // Gather all input values
     const inputs = {};
     
-    // Get values from all input types
-    container.querySelectorAll('input[type="range"]').forEach(input => {
+    widget.querySelectorAll('input[type="range"]').forEach(input => {
       inputs[input.id] = parseFloat(input.value);
     });
     
-    container.querySelectorAll('select').forEach(select => {
-      inputs[select.id] = select.value;
-    });
+    console.log("Input values for calculation:", inputs);
     
-    container.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-      inputs[checkbox.id] = checkbox.checked ? 1 : 0;
-    });
-    
-    container.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
-      inputs[radio.name] = radio.value;
-    });
-    
-    container.querySelectorAll('input[type="number"]').forEach(field => {
-      inputs[field.id] = parseFloat(field.value);
-    });
-    
-    // Apply calculations from config
-    config.elements
-      .filter(element => element.type === 'result')
-      .forEach(result => {
-        let value = 0;
-        
-        if (result.formula) {
-          try {
-            // Call the formula function with inputs
-            value = result.formula(inputs);
-          } catch (error) {
-            console.error('Calculation error for ' + result.id + ':', error);
-            console.error('Inputs:', inputs);
+    // Calculate each result
+    config.elements.forEach(element => {
+      if (element.type === 'result' && typeof element.formula === 'function') {
+        try {
+          // Execute the formula function
+          const result = element.formula(inputs);
+          console.log(`${element.id} result:`, result);
+          
+          // Update the display
+          const displayElement = widget.querySelector(`#${element.id}`);
+          if (displayElement) {
+            displayElement.textContent = formatCurrency(result);
           }
+        } catch (error) {
+          console.error(`Error calculating ${element.id}:`, error);
         }
-        
-        // Format as currency and update DOM
-        const element = container.querySelector(`#${result.id}`);
-        if (element) {
-          element.textContent = formatCurrency(value);
-        }
-      });
+      }
+    });
   }
 
   function formatCurrency(value) {
-    // Format like "$1,792.00" - standard currency format
-    const rounded = Math.round(value * 100) / 100;
-    const formatter = new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
       minimumFractionDigits: 2,
       maximumFractionDigits: 2
-    });
-    
-    return formatter.format(rounded);
+    }).format(value);
   }
 
   // Initialize when DOM is ready
@@ -317,6 +302,6 @@
     initCalculator();
   }
   
-  // Also listen for our custom event
+  // Also listen for custom event
   document.addEventListener('calculatorInit', initCalculator);
 })();

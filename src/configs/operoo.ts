@@ -1,26 +1,4 @@
-export interface CalculatorElement {
-  type: 'slider' | 'list' | 'checkbox' | 'radio' | 'field' | 'text' | 'image' | 'button' | 'result';
-  id: string;
-  label: string;
-  description?: string;
-  min?: number;
-  max?: number;
-  step?: number;
-  default?: number;
-  options?: Array<{ label: string; value: string }>;
-  formula?: (inputs: Record<string, number>) => number;
-  isTotal?: boolean;
-}
-
-export interface CalculatorConfig {
-  id: string;
-  name: string;
-  description: string;
-  elements: CalculatorElement[];
-  allowedDomains: string[];
-}
-
-export const operooConfig: CalculatorConfig = {
+export const operooConfig = {
   id: 'operoo',
   name: 'Operoo Cost Calculator',
   description: 'Calculate costs related to Operoo usage in schools',
@@ -79,39 +57,39 @@ export const operooConfig: CalculatorConfig = {
       type: "result",
       id: "paperCost",
       label: "Paper Costs @ 1.4c per page",
-      formula: (inputs) => (inputs.students * inputs.pagesStudent) * 0.014
+      formula: "(inputs.students * inputs.pagesStudent) * 0.014"
     },
     {
       type: "result",
       id: "printingCost",
       label: "Printing/Toner Costs @ 1.2c per page",
-      formula: (inputs) => (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012
+      formula: "(inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012"
     },
     {
       type: "result",
       id: "maintenanceCost",
       label: "Printer/Copier Maintenance @ $395 service fee every 50,000 copies",
-      formula: (inputs) => ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395
+      formula: "((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395"
     },
     {
       type: "result",
       id: "postageCost",
       label: "Postage Costs @ 50c per mailout",
-      formula: (inputs) => (inputs.students * inputs.mailoutsStudent) * 0.5
+      formula: "(inputs.students * inputs.mailoutsStudent) * 0.5"
     },
     {
       type: "result",
       id: "totalCost",
       label: "Total",
       isTotal: true,
-      formula: (inputs) => {
+      formula: `
         const paperCost = (inputs.students * inputs.pagesStudent) * 0.014;
         const printingCost = (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012;
         const maintenanceCost = ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395;
         const postageCost = (inputs.students * inputs.mailoutsStudent) * 0.5;
         return paperCost + printingCost + maintenanceCost + postageCost;
-      }
+      `
     }
   ],
-  allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com"],
+  allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com", "localhost"]
 };

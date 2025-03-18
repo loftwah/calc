@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculator Test</title>
+    <!-- Load the CSS directly from file -->
+    <link rel="stylesheet" href="public/calculator.css">
+    <style>
+        /* Just some basic page styling */
+        body {
+            background-color: #f8fafc;
+            padding: 30px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Calculator container with operoo config -->
+    <div id="calculator" data-config="operoo"></div>
+    
+    <!-- OPTIONAL: Inline config data for direct testing -->
+    <script>
+        // If you want to test with inline config instead of loading from server
+        /*
+        const operooConfig = {
+          id: 'operoo',
+          name: 'Operoo Cost Calculator',
+          description: 'Calculate costs related to Operoo usage in schools',
+          elements: [
+            {
+              type: "slider",
+              id: "students",
+              label: "Number of Students",
+              min: 0,
+              max: 3000,
+              step: 1,
+              default: 1000,
+              description: "Total number of students in the school"
+            },
+            {
+              type: "slider",
+              id: "pagesStudent",
+              label: "Pages per Student",
+              min: 0,
+              max: 500,
+              step: 1,
+              default: 100,
+              description: "Includes registration, consent forms, handbooks, policies, agreements..."
+            },
+            {
+              type: "slider",
+              id: "mailoutsStudent",
+              label: "Mailouts per Student",
+              min: 0,
+              max: 50,
+              step: 1,
+              default: 10,
+              description: "Letters via mail. Most schools conduct about 18 mail-outs per year."
+            },
+            {
+              type: "slider",
+              id: "staff",
+              label: "Number of Staff",
+              min: 0,
+              max: 300,
+              step: 1,
+              default: 50,
+              description: "Total number of staff members"
+            },
+            {
+              type: "slider",
+              id: "pagesStaff",
+              label: "Pages per Staff",
+              min: 0,
+              max: 500,
+              step: 1,
+              default: 100,
+              description: "Includes HR forms, contracts, policies, agreements, etc."
+            },
+            {
+              type: "result",
+              id: "paperCost",
+              label: "Paper Costs @ 1.4c per page",
+              formula: function(inputs) { return (inputs.students * inputs.pagesStudent) * 0.014; }
+            },
+            {
+              type: "result",
+              id: "printingCost",
+              label: "Printing/Toner Costs @ 1.2c per page",
+              formula: function(inputs) { return (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012; }
+            },
+            {
+              type: "result",
+              id: "maintenanceCost",
+              label: "Printer/Copier Maintenance @ $395 service fee every 50,000 copies",
+              formula: function(inputs) { return ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395; }
+            },
+            {
+              type: "result",
+              id: "postageCost",
+              label: "Postage Costs @ 50c per mailout",
+              formula: function(inputs) { return (inputs.students * inputs.mailoutsStudent) * 0.5; }
+            },
+            {
+              type: "result",
+              id: "totalCost",
+              label: "Total",
+              isTotal: true,
+              formula: function(inputs) {
+                const paperCost = (inputs.students * inputs.pagesStudent) * 0.014;
+                const printingCost = (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012;
+                const maintenanceCost = ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395;
+                const postageCost = (inputs.students * inputs.mailoutsStudent) * 0.5;
+                return paperCost + printingCost + maintenanceCost + postageCost;
+              }
+            }
+          ],
+          allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com", "localhost"]
+        };
+        
+        // Put the config data into the element
+        document.getElementById('calculator').setAttribute('data-calculator', JSON.stringify(operooConfig));
+        */
+    </script>
+    
+    <!-- Load the JavaScript directly from file -->
+    <script src="public/calculator.js"></script>
+</body>
+</html>
