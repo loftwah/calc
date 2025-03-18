@@ -259,8 +259,16 @@
     // Gather all input values
     const inputs = {};
     
+    // Set defaults for required values to prevent NaN
+    inputs.students = 0;
+    inputs.pagesStudent = 0;
+    inputs.mailoutsStudent = 0;
+    inputs.staff = 0;
+    inputs.pagesStaff = 0;
+    
+    // Get actual values from sliders
     widget.querySelectorAll('input[type="range"]').forEach(input => {
-      inputs[input.id] = parseFloat(input.value);
+      inputs[input.id] = parseFloat(input.value) || 0; // Use 0 if NaN
     });
     
     // Calculate each result
@@ -273,7 +281,7 @@
           // Update the display
           const displayElement = widget.querySelector(`#${element.id}`);
           if (displayElement) {
-            displayElement.textContent = formatCurrency(result);
+            displayElement.textContent = formatCurrency(isNaN(result) ? 0 : result);
           }
         } catch (error) {
           // Silently handle errors
