@@ -1,0 +1,40 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import Calculator from '../../components/Calculator.astro';
+import { operooConfig } from '../../configs/operoo';
+import { templateConfig } from '../../configs/template';
+
+// Map of all available calculators
+const calculatorMap = {
+  [operooConfig.id]: operooConfig,
+  [templateConfig.id]: templateConfig,
+  // Add new calculators here as they're created
+};
+
+export function getStaticPaths() {
+  return Object.keys(calculatorMap).map(id => ({
+    params: { id }
+  }));
+}
+
+const { id } = Astro.params;
+const calculator = calculatorMap[id];
+
+if (!calculator) {
+  return Astro.redirect('/calculators');
+}
+---
+
+<SiteLayout 
+  title={calculator.name}
+  description={calculator.description}
+>
+  <div>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">{calculator.name}</h1>
+      <p class="text-gray-600 mt-2">{calculator.description}</p>
+    </div>
+
+    <Calculator config={calculator} />
+  </div>
+</SiteLayout> 

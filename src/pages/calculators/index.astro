@@ -1,0 +1,32 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { operooConfig } from '../../configs/operoo';
+// Import all calculator configs here
+import { templateConfig } from '../../configs/template';
+
+// Collect all calculator configs
+const calculators = [
+  operooConfig,
+  templateConfig,
+  // Add new calculators here as they're created
+].filter(calc => calc.id && calc.name); // Only show valid calculators
+---
+
+<SiteLayout title="Calculator Directory">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Available Calculators</h1>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      {calculators.map(calc => (
+        <a 
+          href={`/calculators/${calc.id}`} 
+          class="block bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+        >
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">{calc.name}</h2>
+          <p class="text-gray-600 text-sm mb-4">{calc.description}</p>
+          <div class="text-blue-600 text-sm">View Calculator →</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</SiteLayout> 

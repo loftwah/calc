@@ -1,17 +1,1 @@
----
-interface Props {
-  src: string;
-  alt: string;
-  className?: string;
-}
-
-const { src, alt, className = "" } = Astro.props;
----
-
-<div class={`image-component ${className}`}>
-  <img 
-    src={src} 
-    alt={alt} 
-    class="max-w-full h-auto rounded-lg"
-  />
-</div> 
+// Delete this entire file 

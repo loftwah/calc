@@ -1,0 +1,1229 @@
+This file is a merged representation of the entire codebase, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of the entire repository's contents.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+<additional_info>
+
+</additional_info>
+
+</file_summary>
+
+<directory_structure>
+.github/
+  workflows/
+    deploy.yml
+public/
+  CNAME
+  favicon.svg
+src/
+  assets/
+    astro.svg
+    background.svg
+  components/
+    Button.astro
+    Calculator.astro
+    Checkbox.astro
+    Field.astro
+    Image.astro
+    List.astro
+    Radio.astro
+    Result.astro
+    Slider.astro
+    Text.astro
+  configs/
+    operoo.ts
+    template.ts
+  layouts/
+    Layout.astro
+    SiteLayout.astro
+  pages/
+    calculators/
+      [id].astro
+      index.astro
+    calculator.astro
+    components-demo.astro
+    components.astro
+    index.astro
+  styles/
+    global.css
+  utils/
+    domainCheck.ts
+.gitignore
+astro.config.mjs
+CNAME
+package.json
+README.md
+tailwind.config.mjs
+tsconfig.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="src/configs/template.ts">
+export interface CalculatorElement {
+  type: 'slider' | 'list' | 'checkbox' | 'radio' | 'field' | 'text' | 'image' | 'button' | 'result';
+  id: string;
+  label: string;
+  description?: string;
+  // Slider specific
+  min?: number;
+  max?: number;
+  step?: number;
+  default?: number;
+  // List/Radio specific
+  options?: Array<{ label: string; value: string }>;
+  // Result specific
+  formula?: (inputs: Record<string, number>) => number;
+  isTotal?: boolean;
+}
+
+export interface CalculatorConfig {
+  id: string;
+  name: string;
+  description: string;
+  elements: CalculatorElement[];
+  allowedDomains: string[];
+}
+
+export const templateConfig: CalculatorConfig = {
+  id: 'template',
+  name: 'Template Calculator',
+  description: 'A demo calculator showing all possible components',
+  elements: [
+    {
+      type: 'slider',
+      id: 'demoSlider',
+      label: 'Demo Slider',
+      min: 0,
+      max: 100,
+      step: 1,
+      default: 50,
+      description: 'This is a demo slider'
+    },
+    {
+      type: 'text',
+      id: 'demoText',
+      label: 'Demo Text',
+      description: 'This is some static text'
+    },
+    {
+      type: 'result',
+      id: 'demoResult',
+      label: 'Demo Result',
+      formula: (inputs) => inputs.demoSlider * 2
+    }
+  ],
+  allowedDomains: ['localhost', '*.deanlofts.xyz']
+};
+</file>
+
+<file path="src/layouts/SiteLayout.astro">
+---
+import Layout from './Layout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+---
+
+<Layout title={title}>
+  <div class="min-h-screen bg-gray-50">
+    <nav class="bg-white shadow">
+      <div class="max-w-7xl mx-auto px-4">
+        <div class="flex justify-between h-16">
+          <div class="flex">
+            <div class="flex-shrink-0 flex items-center">
+              <a href="/" class="text-xl font-bold text-gray-900">
+                SchoolStatus Calculator
+              </a>
+            </div>
+            <div class="hidden sm:ml-6 sm:flex sm:space-x-8">
+              <a href="/" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                Home
+              </a>
+              <a href="/calculators" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                Calculators
+              </a>
+              <a href="/components" class="inline-flex items-center px-1 pt-1 text-gray-500 hover:text-gray-900">
+                Components
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+
+    <main class="py-12">
+      <div class="max-w-4xl mx-auto px-4">
+        <slot />
+      </div>
+    </main>
+
+    <footer class="bg-white border-t">
+      <div class="max-w-7xl mx-auto py-6 px-4">
+        <p class="text-center text-gray-500 text-sm">
+          © {new Date().getFullYear()} SchoolStatus Calculator. All rights reserved.
+        </p>
+      </div>
+    </footer>
+  </div>
+</Layout>
+</file>
+
+<file path="src/pages/calculators/[id].astro">
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import Calculator from '../../components/Calculator.astro';
+import { operooConfig } from '../../configs/operoo';
+import { templateConfig } from '../../configs/template';
+
+// Map of all available calculators
+const calculatorMap = {
+  [operooConfig.id]: operooConfig,
+  [templateConfig.id]: templateConfig,
+  // Add new calculators here as they're created
+};
+
+export function getStaticPaths() {
+  return Object.keys(calculatorMap).map(id => ({
+    params: { id }
+  }));
+}
+
+const { id } = Astro.params;
+const calculator = calculatorMap[id];
+
+if (!calculator) {
+  return Astro.redirect('/calculators');
+}
+---
+
+<SiteLayout 
+  title={calculator.name}
+  description={calculator.description}
+>
+  <div>
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900">{calculator.name}</h1>
+      <p class="text-gray-600 mt-2">{calculator.description}</p>
+    </div>
+
+    <Calculator config={calculator} />
+  </div>
+</SiteLayout>
+</file>
+
+<file path="src/pages/calculators/index.astro">
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { operooConfig } from '../../configs/operoo';
+// Import all calculator configs here
+import { templateConfig } from '../../configs/template';
+
+// Collect all calculator configs
+const calculators = [
+  operooConfig,
+  templateConfig,
+  // Add new calculators here as they're created
+].filter(calc => calc.id && calc.name); // Only show valid calculators
+---
+
+<SiteLayout title="Calculator Directory">
+  <div>
+    <h1 class="text-3xl font-bold text-gray-900 mb-8">Available Calculators</h1>
+
+    <div class="grid gap-6 md:grid-cols-2">
+      {calculators.map(calc => (
+        <a 
+          href={`/calculators/${calc.id}`} 
+          class="block bg-white p-6 rounded-lg shadow hover:shadow-md transition-shadow"
+        >
+          <h2 class="text-xl font-semibold text-gray-900 mb-2">{calc.name}</h2>
+          <p class="text-gray-600 text-sm mb-4">{calc.description}</p>
+          <div class="text-blue-600 text-sm">View Calculator →</div>
+        </a>
+      ))}
+    </div>
+  </div>
+</SiteLayout>
+</file>
+
+<file path="src/pages/calculator.astro">
+---
+import Layout from '../layouts/Layout.astro';
+import Calculator from '../components/Calculator.astro';
+import { operooConfig } from '../configs/operoo';
+// Import other calculator configs as they become available
+---
+
+<Layout title="Calculator Demo">
+  <main class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+      <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-900">Calculator Demo</h1>
+        <a href="/" class="text-blue-600 hover:underline">Back to Instructions</a>
+      </div>
+
+      <div class="space-y-8">
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Operoo Cost Calculator</h2>
+          <Calculator config={operooConfig} />
+        </section>
+
+        <!-- Add more calculator sections as they become available -->
+        <!-- Example:
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Another Calculator</h2>
+          <Calculator config={anotherConfig} />
+        </section>
+        -->
+      </div>
+    </div>
+  </main>
+</Layout>
+</file>
+
+<file path="src/pages/components.astro">
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+// ... rest of your imports ...
+---
+
+<SiteLayout title="Component Library">
+  <!-- ... rest of your existing components demo code ... -->
+</SiteLayout>
+</file>
+
+<file path="public/CNAME">
+calc.deanlofts.xyz
+</file>
+
+<file path="public/favicon.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 128 128">
+    <path d="M50.4 78.5a75.1 75.1 0 0 0-28.5 6.9l24.2-65.7c.7-2 1.9-3.2 3.4-3.2h29c1.5 0 2.7 1.2 3.4 3.2l24.2 65.7s-11.6-7-28.5-7L67 45.5c-.4-1.7-1.6-2.8-2.9-2.8-1.3 0-2.5 1.1-2.9 2.7L50.4 78.5Zm-1.1 28.2Zm-4.2-20.2c-2 6.6-.6 15.8 4.2 20.2a17.5 17.5 0 0 1 .2-.7 5.5 5.5 0 0 1 5.7-4.5c2.8.1 4.3 1.5 4.7 4.7.2 1.1.2 2.3.2 3.5v.4c0 2.7.7 5.2 2.2 7.4a13 13 0 0 0 5.7 4.9v-.3l-.2-.3c-1.8-5.6-.5-9.5 4.4-12.8l1.5-1a73 73 0 0 0 3.2-2.2 16 16 0 0 0 6.8-11.4c.3-2 .1-4-.6-6l-.8.6-1.6 1a37 37 0 0 1-22.4 2.7c-5-.7-9.7-2-13.2-6.2Z" />
+    <style>
+        path { fill: #000; }
+        @media (prefers-color-scheme: dark) {
+            path { fill: #FFF; }
+        }
+    </style>
+</svg>
+</file>
+
+<file path="src/assets/astro.svg">
+<svg xmlns="http://www.w3.org/2000/svg" fill="none" width="115" height="48"><path fill="#17191E" d="M7.77 36.35C6.4 35.11 6 32.51 6.57 30.62c.99 1.2 2.35 1.57 3.75 1.78 2.18.33 4.31.2 6.33-.78.23-.12.44-.27.7-.42.18.55.23 1.1.17 1.67a4.56 4.56 0 0 1-1.94 3.23c-.43.32-.9.61-1.34.91-1.38.94-1.76 2.03-1.24 3.62l.05.17a3.63 3.63 0 0 1-1.6-1.38 3.87 3.87 0 0 1-.63-2.1c0-.37 0-.74-.05-1.1-.13-.9-.55-1.3-1.33-1.32a1.56 1.56 0 0 0-1.63 1.26c0 .06-.03.12-.05.2Z"/><path fill="url(#a)" d="M7.77 36.35C6.4 35.11 6 32.51 6.57 30.62c.99 1.2 2.35 1.57 3.75 1.78 2.18.33 4.31.2 6.33-.78.23-.12.44-.27.7-.42.18.55.23 1.1.17 1.67a4.56 4.56 0 0 1-1.94 3.23c-.43.32-.9.61-1.34.91-1.38.94-1.76 2.03-1.24 3.62l.05.17a3.63 3.63 0 0 1-1.6-1.38 3.87 3.87 0 0 1-.63-2.1c0-.37 0-.74-.05-1.1-.13-.9-.55-1.3-1.33-1.32a1.56 1.56 0 0 0-1.63 1.26c0 .06-.03.12-.05.2Z"/><path fill="#17191E" d="M.02 30.31s4.02-1.95 8.05-1.95l3.04-9.4c.11-.45.44-.76.82-.76.37 0 .7.31.82.76l3.04 9.4c4.77 0 8.05 1.95 8.05 1.95L17 11.71c-.2-.56-.53-.91-.98-.91H7.83c-.44 0-.76.35-.97.9L.02 30.31Zm42.37-5.97c0 1.64-2.05 2.62-4.88 2.62-1.85 0-2.5-.45-2.5-1.41 0-1 .8-1.49 2.65-1.49 1.67 0 3.09.03 4.73.23v.05Zm.03-2.04a21.37 21.37 0 0 0-4.37-.36c-5.32 0-7.82 1.25-7.82 4.18 0 3.04 1.71 4.2 5.68 4.2 3.35 0 5.63-.84 6.46-2.92h.14c-.03.5-.05 1-.05 1.4 0 1.07.18 1.16 1.06 1.16h4.15a16.9 16.9 0 0 1-.36-4c0-1.67.06-2.93.06-4.62 0-3.45-2.07-5.64-8.56-5.64-2.8 0-5.9.48-8.26 1.19.22.93.54 2.83.7 4.06 2.04-.96 4.95-1.37 7.2-1.37 3.11 0 3.97.71 3.97 2.15v.57Zm11.37 3c-.56.07-1.33.07-2.12.07-.83 0-1.6-.03-2.12-.1l-.02.58c0 2.85 1.87 4.52 8.45 4.52 6.2 0 8.2-1.64 8.2-4.55 0-2.74-1.33-4.09-7.2-4.39-4.58-.2-4.99-.7-4.99-1.28 0-.66.59-1 3.65-1 3.18 0 4.03.43 4.03 1.35v.2a46.13 46.13 0 0 1 4.24.03l.02-.55c0-3.36-2.8-4.46-8.2-4.46-6.08 0-8.13 1.49-8.13 4.39 0 2.6 1.64 4.23 7.48 4.48 4.3.14 4.77.62 4.77 1.28 0 .7-.7 1.03-3.71 1.03-3.47 0-4.35-.48-4.35-1.47v-.13Zm19.82-12.05a17.5 17.5 0 0 1-6.24 3.48c.03.84.03 2.4.03 3.24l1.5.02c-.02 1.63-.04 3.6-.04 4.9 0 3.04 1.6 5.32 6.58 5.32 2.1 0 3.5-.23 5.23-.6a43.77 43.77 0 0 1-.46-4.13c-1.03.34-2.34.53-3.78.53-2 0-2.82-.55-2.82-2.13 0-1.37 0-2.65.03-3.84 2.57.02 5.13.07 6.64.11-.02-1.18.03-2.9.1-4.04-2.2.04-4.65.07-6.68.07l.07-2.93h-.16Zm13.46 6.04a767.33 767.33 0 0 1 .07-3.18H82.6c.07 1.96.07 3.98.07 6.92 0 2.95-.03 4.99-.07 6.93h5.18c-.09-1.37-.11-3.68-.11-5.65 0-3.1 1.26-4 4.12-4 1.33 0 2.28.16 3.1.46.03-1.16.26-3.43.4-4.43-.86-.25-1.81-.41-2.96-.41-2.46-.03-4.26.98-5.1 3.38l-.17-.02Zm22.55 3.65c0 2.5-1.8 3.66-4.64 3.66-2.81 0-4.61-1.1-4.61-3.66s1.82-3.52 4.61-3.52c2.82 0 4.64 1.03 4.64 3.52Zm4.71-.11c0-4.96-3.87-7.18-9.35-7.18-5.5 0-9.23 2.22-9.23 7.18 0 4.94 3.49 7.59 9.21 7.59 5.77 0 9.37-2.65 9.37-7.6Z"/><defs><linearGradient id="a" x1="6.33" x2="19.43" y1="40.8" y2="34.6" gradientUnits="userSpaceOnUse"><stop stop-color="#D83333"/><stop offset="1" stop-color="#F041FF"/></linearGradient></defs></svg>
+</file>
+
+<file path="src/assets/background.svg">
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="1024" fill="none"><path fill="url(#a)" fill-rule="evenodd" d="M-217.58 475.75c91.82-72.02 225.52-29.38 341.2-44.74C240 415.56 372.33 315.14 466.77 384.9c102.9 76.02 44.74 246.76 90.31 366.31 29.83 78.24 90.48 136.14 129.48 210.23 57.92 109.99 169.67 208.23 155.9 331.77-13.52 121.26-103.42 264.33-224.23 281.37-141.96 20.03-232.72-220.96-374.06-196.99-151.7 25.73-172.68 330.24-325.85 315.72-128.6-12.2-110.9-230.73-128.15-358.76-12.16-90.14 65.87-176.25 44.1-264.57-26.42-107.2-167.12-163.46-176.72-273.45-10.15-116.29 33.01-248.75 124.87-320.79Z" clip-rule="evenodd" style="opacity:.154"/><path fill="url(#b)" fill-rule="evenodd" d="M1103.43 115.43c146.42-19.45 275.33-155.84 413.5-103.59 188.09 71.13 409 212.64 407.06 413.88-1.94 201.25-259.28 278.6-414.96 405.96-130 106.35-240.24 294.39-405.6 265.3-163.7-28.8-161.93-274.12-284.34-386.66-134.95-124.06-436-101.46-445.82-284.6-9.68-180.38 247.41-246.3 413.54-316.9 101.01-42.93 207.83 21.06 316.62 6.61Z" clip-rule="evenodd" style="opacity:.154"/><defs><linearGradient id="b" x1="373" x2="1995.44" y1="1100" y2="118.03" gradientUnits="userSpaceOnUse"><stop stop-color="#D83333"/><stop offset="1" stop-color="#F041FF"/></linearGradient><linearGradient id="a" x1="107.37" x2="1130.66" y1="1993.35" y2="1026.31" gradientUnits="userSpaceOnUse"><stop stop-color="#3245FF"/><stop offset="1" stop-color="#BC52EE"/></linearGradient></defs></svg>
+</file>
+
+<file path="src/components/Button.astro">
+---
+interface Props {
+  id: string;
+  label: string;
+  type?: "button" | "submit" | "reset";
+  variant?: "primary" | "secondary";
+}
+
+const { id, label, type = "button", variant = "primary" } = Astro.props;
+
+const variantClasses = {
+  primary: "bg-blue-600 text-white hover:bg-blue-700",
+  secondary: "bg-gray-200 text-gray-700 hover:bg-gray-300"
+};
+---
+
+<button
+  id={id}
+  type={type}
+  class={`px-4 py-2 rounded-md text-sm font-medium focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${variantClasses[variant]}`}
+>
+  {label}
+</button>
+</file>
+
+<file path="src/components/Checkbox.astro">
+---
+interface Props {
+  id: string;
+  label: string;
+  checked?: boolean;
+}
+
+const { id, label, checked = false } = Astro.props;
+---
+
+<div class="checkbox-component">
+  <label class="inline-flex items-center">
+    <input
+      type="checkbox"
+      id={id}
+      checked={checked}
+      class="rounded border-gray-300 text-blue-600 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+    />
+    <span class="ml-2 text-sm text-gray-700">{label}</span>
+  </label>
+</div>
+</file>
+
+<file path="src/components/Field.astro">
+---
+interface Props {
+  id: string;
+  label: string;
+  value: number;
+  min?: number;
+  max?: number;
+  step?: number;
+}
+
+const { id, label, value, min, max, step } = Astro.props;
+---
+
+<div class="field-component">
+  <label for={id} class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+  <input
+    type="number"
+    id={id}
+    value={value}
+    min={min}
+    max={max}
+    step={step}
+    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+  />
+</div>
+</file>
+
+<file path="src/components/Image.astro">
+---
+interface Props {
+  src: string;
+  alt: string;
+  className?: string;
+}
+
+const { src, alt, className = "" } = Astro.props;
+---
+
+<div class={`image-component ${className}`}>
+  <img 
+    src={src} 
+    alt={alt} 
+    class="max-w-full h-auto rounded-lg"
+  />
+</div>
+</file>
+
+<file path="src/components/List.astro">
+---
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  id: string;
+  label: string;
+  options: Option[];
+  value: string;
+}
+
+const { id, label, options, value } = Astro.props;
+---
+
+<div class="list-component">
+  <label for={id} class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+  <select 
+    id={id} 
+    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+  >
+    {options.map(option => (
+      <option value={option.value} selected={option.value === value}>
+        {option.label}
+      </option>
+    ))}
+  </select>
+</div>
+</file>
+
+<file path="src/components/Radio.astro">
+---
+interface Option {
+  label: string;
+  value: string;
+}
+
+interface Props {
+  id: string;
+  label: string;
+  options: Option[];
+  value: string;
+}
+
+const { id, label, options, value } = Astro.props;
+---
+
+<div class="radio-component">
+  <span class="block text-sm font-medium text-gray-700 mb-1">{label}</span>
+  <div class="space-y-2">
+    {options.map(option => (
+      <label class="inline-flex items-center mr-4">
+        <input
+          type="radio"
+          name={id}
+          value={option.value}
+          checked={option.value === value}
+          class="border-gray-300 text-blue-600 focus:ring-blue-500"
+        />
+        <span class="ml-2 text-sm text-gray-700">{option.label}</span>
+      </label>
+    ))}
+  </div>
+</div>
+</file>
+
+<file path="src/components/Text.astro">
+---
+interface Props {
+  text: string;
+  className?: string;
+}
+
+const { text, className = "" } = Astro.props;
+---
+
+<div class={`text-component ${className}`}>
+  <p class="text-sm text-gray-700">{text}</p>
+</div>
+</file>
+
+<file path="src/configs/operoo.ts">
+export const operooConfig = {
+  elements: [
+    {
+      type: "slider",
+      id: "students",
+      label: "Number of Students",
+      min: 0,
+      max: 3000,
+      step: 1,
+      default: 1000,
+    },
+    {
+      type: "slider",
+      id: "pagesStudent",
+      label: "Pages per Student",
+      min: 0,
+      max: 500,
+      step: 1,
+      default: 100,
+      description:
+        "Includes registration, consent forms, handbooks, policies, agreements…",
+    },
+    {
+      type: "slider",
+      id: "mailoutsStudent",
+      label: "Mailouts per Student",
+      min: 0,
+      max: 50,
+      step: 1,
+      default: 10,
+      description:
+        "Letters via mail. Most schools conduct about 18 mail-outs per year.",
+    },
+    {
+      type: "slider",
+      id: "staff",
+      label: "Number of Staff",
+      min: 0,
+      max: 300,
+      step: 1,
+      default: 50,
+    },
+    {
+      type: "slider",
+      id: "pagesStaff",
+      label: "Pages per Staff",
+      min: 0,
+      max: 500,
+      step: 1,
+      default: 100,
+      description: "Includes HR forms, contracts, policies, agreements, etc.",
+    }
+  ],
+  allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz"],
+};
+</file>
+
+<file path="src/layouts/Layout.astro">
+---
+import '../styles/global.css';
+
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="Astro description" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+	</head>
+	<body>
+		<slot />
+	</body>
+</html>
+
+<style>
+	html,
+	body {
+		margin: 0;
+		width: 100%;
+		height: 100%;
+	}
+</style>
+</file>
+
+<file path="src/pages/components-demo.astro">
+---
+import Layout from '../layouts/Layout.astro';
+import Slider from '../components/Slider.astro';
+import List from '../components/List.astro';
+import Checkbox from '../components/Checkbox.astro';
+import Radio from '../components/Radio.astro';
+import Field from '../components/Field.astro';
+import Text from '../components/Text.astro';
+import Image from '../components/Image.astro';
+import Button from '../components/Button.astro';
+import Result from '../components/Result.astro';
+---
+
+<Layout title="Component Demo">
+  <main class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">Component Demo</h1>
+      
+      <div class="space-y-8">
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Slider</h2>
+          <Slider
+            id="demoSlider"
+            label="Example Slider"
+            min={0}
+            max={100}
+            step={1}
+            default={50}
+            description="This is a sample slider description"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">List (Dropdown)</h2>
+          <List
+            id="demoList"
+            label="Example Dropdown"
+            options={[
+              { label: "Option A", value: "a" },
+              { label: "Option B", value: "b" }
+            ]}
+            value="a"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Checkbox</h2>
+          <Checkbox
+            id="demoCheckbox"
+            label="Example Checkbox"
+            checked={false}
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Radio Group</h2>
+          <Radio
+            id="demoRadio"
+            label="Example Radio Group"
+            options={[
+              { label: "Option 1", value: "1" },
+              { label: "Option 2", value: "2" }
+            ]}
+            value="1"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Number Field</h2>
+          <Field
+            id="demoField"
+            label="Example Number Input"
+            value={42}
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Text Component</h2>
+          <Text text="This is an example of static text display" />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Image Component</h2>
+          <Image
+            src="/favicon.svg"
+            alt="Example image"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Buttons</h2>
+          <div class="space-x-4">
+            <Button
+              id="primaryBtn"
+              label="Primary Button"
+              variant="primary"
+            />
+            <Button
+              id="secondaryBtn"
+              label="Secondary Button"
+              variant="secondary"
+            />
+          </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Results</h2>
+          <Result
+            id="demoResult"
+            label="Example Result"
+            value={123.45}
+          />
+          <Result
+            id="demoTotal"
+            label="Example Total"
+            value={999.99}
+            isTotal={true}
+          />
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout>
+</file>
+
+<file path="src/styles/global.css">
+@import "tailwindcss";
+</file>
+
+<file path="src/utils/domainCheck.ts">
+export function checkDomain(
+  hostname: string,
+  allowedDomains: string[]
+): boolean {
+  return allowedDomains.some((domain) => {
+    if (domain.startsWith("*.")) return hostname.endsWith(domain.slice(2));
+    return hostname === domain;
+  });
+}
+</file>
+
+<file path="CNAME">
+calc.deanlofts.xyz
+</file>
+
+<file path="package.json">
+{
+  "name": "calc",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.0.14",
+    "astro": "^5.5.2",
+    "tailwindcss": "^4.0.14"
+  }
+}
+</file>
+
+<file path="tailwind.config.mjs">
+/** @type {import('tailwindcss').Config} */
+export default {
+  content: ['./src/**/*.{astro,html,js,jsx,md,mdx,svelte,ts,tsx,vue}'],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}
+</file>
+
+<file path="tsconfig.json">
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"]
+}
+</file>
+
+<file path="src/components/Calculator.astro">
+---
+import type { CalculatorConfig } from '../configs/template';
+import Slider from './Slider.astro';
+import List from './List.astro';
+import Checkbox from './Checkbox.astro';
+import Radio from './Radio.astro';
+import Field from './Field.astro';
+import Text from './Text.astro';
+import Image from './Image.astro';
+import Button from './Button.astro';
+import Result from './Result.astro';
+
+interface Props {
+  config: CalculatorConfig;
+}
+
+const { config } = Astro.props;
+---
+
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-8">
+  <div class="space-y-6">
+    {config.elements.map((element) => {
+      switch (element.type) {
+        case 'slider':
+          return (
+            <Slider
+              id={element.id}
+              label={element.label}
+              min={element.min}
+              max={element.max}
+              step={element.step}
+              default={element.default}
+              description={element.description}
+            />
+          );
+        case 'list':
+          return (
+            <List
+              id={element.id}
+              label={element.label}
+              options={element.options}
+              value={element.default?.toString() || ''}
+            />
+          );
+        case 'checkbox':
+          return (
+            <Checkbox
+              id={element.id}
+              label={element.label}
+              checked={!!element.default}
+            />
+          );
+        case 'radio':
+          return (
+            <Radio
+              id={element.id}
+              label={element.label}
+              options={element.options}
+              value={element.default?.toString() || ''}
+            />
+          );
+        case 'field':
+          return (
+            <Field
+              id={element.id}
+              label={element.label}
+              value={element.default || 0}
+            />
+          );
+        case 'text':
+          return (
+            <Text text={element.description || element.label} />
+          );
+        case 'result':
+          return (
+            <Result
+              id={element.id}
+              label={element.label}
+              value={0}
+              isTotal={element.isTotal}
+            />
+          );
+        default:
+          return null;
+      }
+    })}
+  </div>
+
+  <div class="mt-8 space-y-2">
+    <Result id="paperCost" label="Paper Costs @ 1.4c per page" value={0} />
+    <Result id="printingCost" label="Printing/Toner Costs @ 1.2c per page" value={0} />
+    <Result id="maintenanceCost" label="Printer/Copier Maintenance @ $395 service fee every 50,000 copies" value={0} />
+    <Result id="postageCost" label="Postage Costs @ 50c per mailout" value={0} />
+    <Result id="totalCost" label="Total" value={0} isTotal={true} />
+  </div>
+</div>
+
+<script>
+  function calculateResults() {
+    const inputs = {};
+    const sliders = document.querySelectorAll('input[type="range"]');
+    sliders.forEach(slider => {
+      inputs[slider.id] = Number(slider.value);
+    });
+
+    // Calculate costs for Operoo calculator
+    if (document.getElementById('students')) {
+      const students = inputs['students'] || 0;
+      const pagesStudent = inputs['pagesStudent'] || 0;
+      const mailoutsStudent = inputs['mailoutsStudent'] || 0;
+      const staff = inputs['staff'] || 0;
+      const pagesStaff = inputs['pagesStaff'] || 0;
+
+      const paperCost = (students * pagesStudent) * 0.014;
+      const printingCost = (students * pagesStudent + staff * pagesStaff) * 0.012;
+      const maintenanceCost = ((students * pagesStudent + staff * pagesStaff) / 50000) * 395;
+      const postageCost = (students * mailoutsStudent) * 0.5;
+      const totalCost = paperCost + printingCost + maintenanceCost + postageCost;
+
+      updateResult('paperCost', paperCost);
+      updateResult('printingCost', printingCost);
+      updateResult('maintenanceCost', maintenanceCost);
+      updateResult('postageCost', postageCost);
+      updateResult('totalCost', totalCost);
+    }
+  }
+
+  function updateResult(id: string, value: number) {
+    const element = document.getElementById(id);
+    if (element) {
+      element.textContent = `$${value.toFixed(2)}`;
+    }
+  }
+
+  // Add event listeners to all sliders
+  document.querySelectorAll('input[type="range"]').forEach(slider => {
+    slider.addEventListener('input', calculateResults);
+  });
+
+  // Initial calculation
+  calculateResults();
+</script>
+</file>
+
+<file path=".gitignore">
+# build output
+dist/
+
+# generated types
+.astro/
+
+# dependencies
+node_modules/
+
+# logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# environment variables
+.env
+.env.production
+
+# macOS-specific files
+.DS_Store
+
+# jetbrains setting folder
+.idea/
+</file>
+
+<file path=".github/workflows/deploy.yml">
+name: Deploy to GitHub Pages
+
+on:
+  # Trigger the workflow every time you push to the `main` branch
+  push:
+    branches: [ main ]
+  # Allows you to run this workflow manually from the Actions tab on GitHub.
+  workflow_dispatch:
+
+# Allow this job to clone the repo and create a page deployment
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout your repository using git
+        uses: actions/checkout@v4
+      - name: Install, build, and upload your site
+        uses: withastro/action@v3
+        # with:
+        #   path: . # The root location of your Astro project inside the repository. (optional)
+        #   node-version: 20 # The specific version of Node that should be used to build your site. Defaults to 20. (optional)
+        #   package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+</file>
+
+<file path="src/components/Result.astro">
+---
+interface Props {
+  id: string;
+  label: string;
+  value: number;
+  isTotal?: boolean;
+}
+
+const { id, label, value, isTotal = false } = Astro.props;
+---
+
+<div class={`flex justify-between items-center py-2 ${isTotal ? 'font-bold border-t border-gray-200 mt-2 pt-4' : ''}`}>
+  <span class="text-gray-700">{label}</span>
+  <span id={id} class="text-gray-900">${value.toFixed(2)}</span>
+</div>
+</file>
+
+<file path="src/components/Slider.astro">
+---
+interface Props {
+  id: string;
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  default: number;
+  description?: string;
+}
+
+const { id, label, min, max, step, default: defaultValue, description } = Astro.props;
+---
+
+<div class="slider-component">
+  <label for={id} class="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+  <input
+    type="range"
+    id={id}
+    min={min}
+    max={max}
+    step={step}
+    value={defaultValue}
+    class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+  />
+  <div class="flex justify-between mt-1">
+    <span class="text-xs text-gray-500">{min}</span>
+    <output for={id} class="text-sm text-gray-700">{defaultValue}</output>
+    <span class="text-xs text-gray-500">{max}</span>
+  </div>
+  {description && <p class="mt-1 text-sm text-gray-500">{description}</p>}
+</div>
+
+<script define:vars={{ id, defaultValue }}>
+  const slider = document.getElementById(id);
+  const output = slider.nextElementSibling.children[1];
+  
+  slider.addEventListener('input', function() {
+    output.textContent = this.value;
+    calculateResults();
+  });
+
+  function calculateResults() {
+    const students = parseInt(document.getElementById('students').value);
+    const pagesStudent = parseInt(document.getElementById('pagesStudent').value);
+    const mailoutsStudent = parseInt(document.getElementById('mailoutsStudent').value);
+    const staff = parseInt(document.getElementById('staff').value);
+    const pagesStaff = parseInt(document.getElementById('pagesStaff').value);
+
+    // Calculate costs
+    const paperCost = (students * pagesStudent) * 0.014;
+    const printingCost = (students * pagesStudent + staff * pagesStaff) * 0.012;
+    const maintenanceCost = ((students * pagesStudent + staff * pagesStaff) / 50000) * 395;
+    const postageCost = (students * mailoutsStudent) * 0.5;
+    const totalCost = paperCost + printingCost + maintenanceCost + postageCost;
+
+    // Update results
+    document.getElementById('paperCost').textContent = `$${paperCost.toFixed(2)}`;
+    document.getElementById('printingCost').textContent = `$${printingCost.toFixed(2)}`;
+    document.getElementById('maintenanceCost').textContent = `$${maintenanceCost.toFixed(2)}`;
+    document.getElementById('postageCost').textContent = `$${postageCost.toFixed(2)}`;
+    document.getElementById('totalCost').textContent = `$${totalCost.toFixed(2)}`;
+  }
+</script>
+</file>
+
+<file path="README.md">
+# Astro Starter Kit: Basics
+
+```sh
+bun create astro@latest -- --template basics
+```
+
+[![Open in StackBlitz](https://developer.stackblitz.com/img/open_in_stackblitz.svg)](https://stackblitz.com/github/withastro/astro/tree/latest/examples/basics)
+[![Open with CodeSandbox](https://assets.codesandbox.io/github/button-edit-lime.svg)](https://codesandbox.io/p/sandbox/github/withastro/astro/tree/latest/examples/basics)
+[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/withastro/astro?devcontainer_path=.devcontainer/basics/devcontainer.json)
+
+> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+
+![just-the-basics](https://github.com/withastro/astro/assets/2244813/a0a5533c-a856-4198-8470-2d67b1d7c554)
+
+## 🚀 Project Structure
+
+Inside of your Astro project, you'll see the following folders and files:
+
+```text
+/
+├── public/
+│   └── favicon.svg
+├── src/
+│   ├── layouts/
+│   │   └── Layout.astro
+│   └── pages/
+│       └── index.astro
+└── package.json
+```
+
+To learn more about the folder structure of an Astro project, refer to [our guide on project structure](https://docs.astro.build/en/basics/project-structure/).
+
+## 🧞 Commands
+
+All commands are run from the root of the project, from a terminal:
+
+| Command                   | Action                                           |
+| :------------------------ | :----------------------------------------------- |
+| `bun install`             | Installs dependencies                            |
+| `bun dev`             | Starts local dev server at `localhost:4321`      |
+| `bun build`           | Build your production site to `./dist/`          |
+| `bun preview`         | Preview your build locally, before deploying     |
+| `bun astro ...`       | Run CLI commands like `astro add`, `astro check` |
+| `bun astro -- --help` | Get help using the Astro CLI                     |
+
+## 👀 Want to learn more?
+
+Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+</file>
+
+<file path="src/pages/index.astro">
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import Calculator from '../components/Calculator.astro';
+
+// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
+// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+---
+
+<SiteLayout title="SchoolStatus Calculator - Embedding Instructions">
+	<div class="space-y-8">
+		<h1 class="text-3xl font-bold text-gray-900">SchoolStatus Calculator Widget</h1>
+		
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Basic Embedding</h2>
+			<div class="bg-gray-50 p-4 rounded-md">
+				<pre class="text-sm overflow-x-auto"><code>&lt;div id="calculator" data-config="operoo"&gt;&lt;/div&gt;
+&lt;script src="https://calc.deanlofts.xyz/calculator.js" async&gt;&lt;/script&gt;</code></pre>
+			</div>
+			<p class="mt-4 text-gray-600">Add this code to any page where you want the calculator to appear.</p>
+		</section>
+
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Available Calculators</h2>
+			<ul class="list-disc list-inside space-y-2 text-gray-600">
+				<li><code>data-config="operoo"</code> - SchoolStatus Operoo Cost Calculator</li>
+				<!-- Add more calculators as they become available -->
+			</ul>
+		</section>
+
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Domain Restrictions</h2>
+			<p class="text-gray-600">This widget is restricted to run only on approved domains. Contact support if you need to whitelist your domain.</p>
+		</section>
+
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Quick Links</h2>
+			<div class="space-y-2">
+				<a href="/calculators" class="text-blue-600 hover:underline block">View All Calculators</a>
+				<a href="/components" class="text-blue-600 hover:underline block">View Component Library</a>
+			</div>
+		</section>
+	</div>
+</SiteLayout>
+</file>
+
+<file path="astro.config.mjs">
+// @ts-check
+import { defineConfig } from 'astro/config';
+
+import tailwindcss from '@tailwindcss/vite';
+
+// https://astro.build/config
+export default defineConfig({
+  output: 'static',
+  site: 'https://calc.deanlofts.xyz',
+  vite: {
+    plugins: [tailwindcss()]
+  }
+});
+</file>
+
+</files>

@@ -1,18 +1,43 @@
 ---
-import Layout from '../layouts/Layout.astro';
+import SiteLayout from '../layouts/SiteLayout.astro';
 import Calculator from '../components/Calculator.astro';
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout title="SchoolStatus Cost Calculator">
-	<main class="min-h-screen bg-gray-50 py-12">
-		<div class="max-w-4xl mx-auto px-4">
-			<h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
-				SchoolStatus Cost Calculator
-			</h1>
-			<Calculator />
-		</div>
-	</main>
-</Layout>
+<SiteLayout title="SchoolStatus Calculator - Embedding Instructions">
+	<div class="space-y-8">
+		<h1 class="text-3xl font-bold text-gray-900">SchoolStatus Calculator Widget</h1>
+		
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Basic Embedding</h2>
+			<div class="bg-gray-50 p-4 rounded-md">
+				<pre class="text-sm overflow-x-auto"><code>&lt;div id="calculator" data-config="operoo"&gt;&lt;/div&gt;
+&lt;script src="https://calc.deanlofts.xyz/calculator.js" async&gt;&lt;/script&gt;</code></pre>
+			</div>
+			<p class="mt-4 text-gray-600">Add this code to any page where you want the calculator to appear.</p>
+		</section>
+
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Available Calculators</h2>
+			<ul class="list-disc list-inside space-y-2 text-gray-600">
+				<li><code>data-config="operoo"</code> - SchoolStatus Operoo Cost Calculator</li>
+				<!-- Add more calculators as they become available -->
+			</ul>
+		</section>
+
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Domain Restrictions</h2>
+			<p class="text-gray-600">This widget is restricted to run only on approved domains. Contact support if you need to whitelist your domain.</p>
+		</section>
+
+		<section class="bg-white p-6 rounded-lg shadow">
+			<h2 class="text-xl font-semibold mb-4">Quick Links</h2>
+			<div class="space-y-2">
+				<a href="/calculators" class="text-blue-600 hover:underline block">View All Calculators</a>
+				<a href="/components" class="text-blue-600 hover:underline block">View Component Library</a>
+			</div>
+		</section>
+	</div>
+</SiteLayout>
