@@ -172,8 +172,7 @@
         setupCalculator(container, config);
         
       } catch (error) {
-        console.error('Failed to load calculator:', error);
-        container.innerHTML = '<div style="color: red; padding: 20px;">Failed to load calculator: ' + error.message + '</div>';
+        container.innerHTML = '<div style="color: red; padding: 20px;">Failed to load calculator</div>';
       }
     }
 
@@ -264,15 +263,12 @@
       inputs[input.id] = parseFloat(input.value);
     });
     
-    console.log("Input values for calculation:", inputs);
-    
     // Calculate each result
     config.elements.forEach(element => {
       if (element.type === 'result' && typeof element.formula === 'function') {
         try {
           // Execute the formula function
           const result = element.formula(inputs);
-          console.log(`${element.id} result:`, result);
           
           // Update the display
           const displayElement = widget.querySelector(`#${element.id}`);
@@ -280,7 +276,7 @@
             displayElement.textContent = formatCurrency(result);
           }
         } catch (error) {
-          console.error(`Error calculating ${element.id}:`, error);
+          // Silently handle errors
         }
       }
     });
