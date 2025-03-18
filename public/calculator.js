@@ -61,25 +61,23 @@
   function renderSlider(element) {
     return `
       <div class="input-group">
-        <div class="slider-header">
-          <label for="${element.id}">${element.label}</label>
-          <div class="range-input">
-            <input 
-              type="range"
-              id="${element.id}"
-              min="${element.min}"
-              max="${element.max}"
-              step="${element.step}"
-              value="${element.default}"
-            />
-          </div>
-          <div class="range-values">
-            <span>0</span>
-            <span class="current-value">${element.default}</span>
-            <span>${element.max}</span>
-          </div>
-        </div>
+        <label for="${element.id}">${element.label}</label>
         ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
+        <div class="range-input">
+          <input 
+            type="range"
+            id="${element.id}"
+            min="${element.min}"
+            max="${element.max}"
+            step="${element.step}"
+            value="${element.default}"
+          />
+        </div>
+        <div class="range-values">
+          <span>${element.min}</span>
+          <span class="current-value">${element.default}</span>
+          <span>${element.max}</span>
+        </div>
       </div>
     `;
   }
@@ -156,7 +154,18 @@
   }
 
   function formatCurrency(value) {
-    return '$' + value.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // Format like "1 792 USD" as shown in the screenshot
+    const rounded = Math.round(value * 100) / 100;
+    const parts = rounded.toString().split('.');
+    const integerFormatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    
+    if (parts.length > 1) {
+      // Add decimal part if it exists
+      const decimal = parts[1].padEnd(2, '0');
+      return `${integerFormatted}.${decimal} USD`;
+    }
+    
+    return `${integerFormatted} USD`;
   }
 
   // Initialize when DOM is ready
