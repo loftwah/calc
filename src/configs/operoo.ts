@@ -76,5 +76,5 @@ export const operooConfig: CalculatorConfig = {
       description: "Includes HR forms, contracts, policies, agreements, etc."
     }
   ],
-  allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz"],
+  allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com"],
 };
