@@ -1,2 +1,0 @@
-# calc
-My calc project
