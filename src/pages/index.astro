@@ -6,8 +6,13 @@ import Calculator from '../components/Calculator.astro';
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout title="SchoolStatus Calculator">
-	<div class="min-h-screen bg-gray-50 py-12">
-		<Calculator />
-	</div>
+<Layout title="SchoolStatus Cost Calculator">
+	<main class="min-h-screen bg-gray-50 py-12">
+		<div class="max-w-4xl mx-auto px-4">
+			<h1 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+				SchoolStatus Cost Calculator
+			</h1>
+			<Calculator />
+		</div>
+	</main>
 </Layout>

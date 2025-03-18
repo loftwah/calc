@@ -1,0 +1,123 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Slider from '../components/Slider.astro';
+import List from '../components/List.astro';
+import Checkbox from '../components/Checkbox.astro';
+import Radio from '../components/Radio.astro';
+import Field from '../components/Field.astro';
+import Text from '../components/Text.astro';
+import Image from '../components/Image.astro';
+import Button from '../components/Button.astro';
+import Result from '../components/Result.astro';
+---
+
+<Layout title="Component Demo">
+  <main class="min-h-screen bg-gray-50 py-12">
+    <div class="max-w-4xl mx-auto px-4">
+      <h1 class="text-3xl font-bold text-gray-900 mb-8">Component Demo</h1>
+      
+      <div class="space-y-8">
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Slider</h2>
+          <Slider
+            id="demoSlider"
+            label="Example Slider"
+            min={0}
+            max={100}
+            step={1}
+            default={50}
+            description="This is a sample slider description"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">List (Dropdown)</h2>
+          <List
+            id="demoList"
+            label="Example Dropdown"
+            options={[
+              { label: "Option A", value: "a" },
+              { label: "Option B", value: "b" }
+            ]}
+            value="a"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Checkbox</h2>
+          <Checkbox
+            id="demoCheckbox"
+            label="Example Checkbox"
+            checked={false}
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Radio Group</h2>
+          <Radio
+            id="demoRadio"
+            label="Example Radio Group"
+            options={[
+              { label: "Option 1", value: "1" },
+              { label: "Option 2", value: "2" }
+            ]}
+            value="1"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Number Field</h2>
+          <Field
+            id="demoField"
+            label="Example Number Input"
+            value={42}
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Text Component</h2>
+          <Text text="This is an example of static text display" />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Image Component</h2>
+          <Image
+            src="/favicon.svg"
+            alt="Example image"
+          />
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Buttons</h2>
+          <div class="space-x-4">
+            <Button
+              id="primaryBtn"
+              label="Primary Button"
+              variant="primary"
+            />
+            <Button
+              id="secondaryBtn"
+              label="Secondary Button"
+              variant="secondary"
+            />
+          </div>
+        </section>
+
+        <section class="bg-white p-6 rounded-lg shadow">
+          <h2 class="text-xl font-semibold mb-4">Results</h2>
+          <Result
+            id="demoResult"
+            label="Example Result"
+            value={123.45}
+          />
+          <Result
+            id="demoTotal"
+            label="Example Total"
+            value={999.99}
+            isTotal={true}
+          />
+        </section>
+      </div>
+    </div>
+  </main>
+</Layout> 
