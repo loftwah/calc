@@ -1,5 +1,6 @@
 ---
 import Layout from '../layouts/Layout.astro';
+import { operooConfig } from '../configs/operoo';
 ---
 
 <Layout title="Calculator Demo">
@@ -15,18 +16,10 @@ import Layout from '../layouts/Layout.astro';
           <h2 class="text-xl font-semibold mb-4">Operoo Cost Calculator</h2>
           <div id="calculator" data-config="operoo"></div>
         </section>
-
-        <!-- Add more calculator sections as they become available -->
-        <!-- Example:
-        <section class="bg-white p-6 rounded-lg shadow">
-          <h2 class="text-xl font-semibold mb-4">Another Calculator</h2>
-          <Calculator config={anotherConfig} />
-        </section>
-        -->
       </div>
     </div>
   </main>
 </Layout>
 
-<link rel="stylesheet" href="/calculator.css" />
-<script is:inline src="/calculator.js"></script> 
+<link rel="stylesheet" href="/calculator.css">
+<script src="/calculator.js"></script> 
