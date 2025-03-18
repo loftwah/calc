@@ -4,9 +4,7 @@ import Slider from './Slider.astro';
 import Result from './Result.astro';
 ---
 
-<div class="max-w-2xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
-  <h2 class="text-2xl font-bold text-gray-900 mb-6">Cost Savings Calculator</h2>
-  
+<div class="max-w-3xl mx-auto bg-white rounded-lg shadow-sm p-8">
   <div class="space-y-6">
     {operooConfig.elements.map((element) => (
       element.type === 'slider' ? (
@@ -23,12 +21,12 @@ import Result from './Result.astro';
     ))}
   </div>
 
-  <div class="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
-    <Result id="paperCost" label="Paper Cost" value={0} />
-    <Result id="printingCost" label="Printing Cost" value={0} />
-    <Result id="maintenanceCost" label="Maintenance Cost" value={0} />
-    <Result id="postageCost" label="Postage Cost" value={0} />
-    <Result id="totalCost" label="Total Cost" value={0} />
+  <div class="mt-8 space-y-2">
+    <Result id="paperCost" label="Paper Costs @ 1.4c per page" value={0} />
+    <Result id="printingCost" label="Priting/Toner Costs @ 1.2c per page" value={0} />
+    <Result id="maintenanceCost" label="Printer/Copier Maintenance @ $395 service fee every 50,000 copies" value={0} />
+    <Result id="postageCost" label="Postage Costs @ 50c per mailout" value={0} />
+    <Result id="totalCost" label="Total" value={0} isTotal={true} />
   </div>
 </div>
 
@@ -57,10 +55,10 @@ import Result from './Result.astro';
     Object.entries(results).forEach(([key, value]) => {
       const element = document.getElementById(`${key}-result`);
       if (element) {
-        element.textContent = `$${value.toLocaleString('en-US', { 
+        element.textContent = `${value.toLocaleString('en-US', { 
           minimumFractionDigits: 2, 
           maximumFractionDigits: 2 
-        })}`;
+        })} USD`;
       }
     });
   });
@@ -70,10 +68,10 @@ import Result from './Result.astro';
   Object.entries(initialResults).forEach(([key, value]) => {
     const element = document.getElementById(`${key}-result`);
     if (element) {
-      element.textContent = `$${value.toLocaleString('en-US', { 
+      element.textContent = `${value.toLocaleString('en-US', { 
         minimumFractionDigits: 2, 
         maximumFractionDigits: 2 
-      })}`;
+      })} USD`;
     }
   });
 </script> 
