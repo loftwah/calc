@@ -43,49 +43,22 @@
             // Add classes to label and value
             const label = el.children[0];
             const value = el.children[1];
-            label.className = 'result-label';
-            value.className = 'result-value';
+            if (label && value) {
+              label.className = 'result-label';
+              value.className = 'result-value';
+            }
           });
           
           // Add proper slider label structure
           container.querySelectorAll('input[type="range"]').forEach(slider => {
             const labels = slider.nextElementSibling;
-            labels.className = 'slider-labels';
+            if (labels) {
+              labels.className = 'slider-labels';
+            }
           });
 
           // Initialize calculation functionality
-          const script = document.createElement('script');
-          script.textContent = `
-            function calculateResults() {
-              const students = parseInt(document.getElementById('students').value) || 0;
-              const pagesStudent = parseInt(document.getElementById('pagesStudent').value) || 0;
-              const mailoutsStudent = parseInt(document.getElementById('mailoutsStudent').value) || 0;
-              const staff = parseInt(document.getElementById('staff').value) || 0;
-              const pagesStaff = parseInt(document.getElementById('pagesStaff').value) || 0;
-
-              const paperCost = (students * pagesStudent) * 0.014;
-              const printingCost = (students * pagesStudent + staff * pagesStaff) * 0.012;
-              const maintenanceCost = ((students * pagesStudent + staff * pagesStaff) / 50000) * 395;
-              const postageCost = (students * mailoutsStudent) * 0.5;
-              const totalCost = paperCost + printingCost + maintenanceCost + postageCost;
-
-              document.getElementById('paperCost').textContent = '$' + paperCost.toFixed(2);
-              document.getElementById('printingCost').textContent = '$' + printingCost.toFixed(2);
-              document.getElementById('maintenanceCost').textContent = '$' + maintenanceCost.toFixed(2);
-              document.getElementById('postageCost').textContent = '$' + postageCost.toFixed(2);
-              document.getElementById('totalCost').textContent = '$' + totalCost.toFixed(2);
-            }
-
-            document.querySelectorAll('input[type="range"]').forEach(slider => {
-              slider.addEventListener('input', function() {
-                this.nextElementSibling.children[1].textContent = this.value;
-                calculateResults();
-              });
-            });
-
-            calculateResults();
-          `;
-          document.body.appendChild(script);
+          initializeCalculations(container);
         }
       } catch (error) {
         console.error('Failed to load calculator:', error);
@@ -94,6 +67,39 @@
     }
 
     window.SchoolStatusCalculator.initialized = true;
+  }
+
+  function initializeCalculations(container) {
+    function calculateResults() {
+      const students = parseInt(container.querySelector('#students')?.value) || 0;
+      const pagesStudent = parseInt(container.querySelector('#pagesStudent')?.value) || 0;
+      const mailoutsStudent = parseInt(container.querySelector('#mailoutsStudent')?.value) || 0;
+      const staff = parseInt(container.querySelector('#staff')?.value) || 0;
+      const pagesStaff = parseInt(container.querySelector('#pagesStaff')?.value) || 0;
+
+      const paperCost = (students * pagesStudent) * 0.014;
+      const printingCost = (students * pagesStudent + staff * pagesStaff) * 0.012;
+      const maintenanceCost = ((students * pagesStudent + staff * pagesStaff) / 50000) * 395;
+      const postageCost = (students * mailoutsStudent) * 0.5;
+      const totalCost = paperCost + printingCost + maintenanceCost + postageCost;
+
+      container.querySelector('#paperCost').textContent = '$' + paperCost.toFixed(2);
+      container.querySelector('#printingCost').textContent = '$' + printingCost.toFixed(2);
+      container.querySelector('#maintenanceCost').textContent = '$' + maintenanceCost.toFixed(2);
+      container.querySelector('#postageCost').textContent = '$' + postageCost.toFixed(2);
+      container.querySelector('#totalCost').textContent = '$' + totalCost.toFixed(2);
+    }
+
+    container.querySelectorAll('input[type="range"]').forEach(slider => {
+      slider.addEventListener('input', function() {
+        if (this.nextElementSibling?.children[1]) {
+          this.nextElementSibling.children[1].textContent = this.value;
+        }
+        calculateResults();
+      });
+    });
+
+    calculateResults();
   }
 
   // Initialize when DOM is ready

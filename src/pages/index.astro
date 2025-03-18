@@ -1,6 +1,8 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
-import Calculator from '../components/Calculator.astro';
+import { calculatorMap } from '../data/calculators';
+
+const operooCalc = calculatorMap['operoo'];
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
@@ -21,7 +23,56 @@ import Calculator from '../components/Calculator.astro';
 
 		<section class="bg-white p-6 rounded-lg shadow">
 			<h2 class="text-xl font-semibold mb-4">Live Demo</h2>
-			<div id="calculator" data-config="operoo"></div>
+			<div class="max-w-3xl mx-auto">
+				<div class="space-y-6">
+					{operooCalc.elements.map(element => {
+						if (element.type === 'slider') {
+							return (
+								<div class="form-group">
+									<label for={element.id}>{element.label}</label>
+									<input 
+										type="range"
+										id={element.id}
+										min={element.min}
+										max={element.max}
+										step={element.step}
+										value={element.default}
+									/>
+									<div class="slider-labels">
+										<span>{element.min}</span>
+										<output>{element.default}</output>
+										<span>{element.max}</span>
+									</div>
+									{element.description && <p class="description">{element.description}</p>}
+								</div>
+							);
+						}
+					})}
+
+					<div class="results">
+						<div class="flex justify-between">
+							<span>Paper Cost</span>
+							<span id="paperCost">$0.00</span>
+						</div>
+						<div class="flex justify-between">
+							<span>Printing Cost</span>
+							<span id="printingCost">$0.00</span>
+						</div>
+						<div class="flex justify-between">
+							<span>Maintenance Cost</span>
+							<span id="maintenanceCost">$0.00</span>
+						</div>
+						<div class="flex justify-between">
+							<span>Postage Cost</span>
+							<span id="postageCost">$0.00</span>
+						</div>
+						<div class="flex justify-between">
+							<span class="font-bold">Total Cost</span>
+							<span id="totalCost" class="font-bold">$0.00</span>
+						</div>
+					</div>
+				</div>
+			</div>
 		</section>
 
 		<section class="bg-white p-6 rounded-lg shadow">
