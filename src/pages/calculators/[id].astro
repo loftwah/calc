@@ -17,65 +17,8 @@ if (!calculator) {
 }
 ---
 
-<SiteLayout 
-  title={calculator.name}
-  description={calculator.description}
->
-  <div class="max-w-3xl mx-auto">
-    <div class="mb-8">
-      <h1 class="text-3xl font-bold text-gray-900">{calculator.name}</h1>
-      <p class="text-gray-600 mt-2">{calculator.description}</p>
-    </div>
-
-    <div class="space-y-6">
-      {calculator.elements.map(element => {
-        if (element.type === 'slider') {
-          return (
-            <div class="form-group">
-              <label for={element.id}>{element.label}</label>
-              <input 
-                type="range"
-                id={element.id}
-                min={element.min}
-                max={element.max}
-                step={element.step}
-                value={element.default}
-              />
-              <div class="slider-labels">
-                <span>{element.min}</span>
-                <output>{element.default}</output>
-                <span>{element.max}</span>
-              </div>
-              {element.description && <p class="description">{element.description}</p>}
-            </div>
-          );
-        }
-      })}
-
-      <div class="results">
-        <div class="flex justify-between">
-          <span>Paper Cost</span>
-          <span id="paperCost">$0.00</span>
-        </div>
-        <div class="flex justify-between">
-          <span>Printing Cost</span>
-          <span id="printingCost">$0.00</span>
-        </div>
-        <div class="flex justify-between">
-          <span>Maintenance Cost</span>
-          <span id="maintenanceCost">$0.00</span>
-        </div>
-        <div class="flex justify-between">
-          <span>Postage Cost</span>
-          <span id="postageCost">$0.00</span>
-        </div>
-        <div class="flex justify-between">
-          <span class="font-bold">Total Cost</span>
-          <span id="totalCost" class="font-bold">$0.00</span>
-        </div>
-      </div>
-    </div>
-  </div>
+<SiteLayout title={calculator.name}>
+  <div id="calculator" data-config={id} data-calculator={JSON.stringify(calculator)}></div>
 </SiteLayout>
 
 <script is:inline src="/calculator.js"></script>

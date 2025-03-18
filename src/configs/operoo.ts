@@ -43,7 +43,7 @@ export const operooConfig: CalculatorConfig = {
       max: 500,
       step: 1,
       default: 100,
-      description: "Includes registration, consent forms, handbooks, policies, agreements…"
+      description: "Includes registration, consent forms, handbooks, policies, agreements..."
     },
     {
       type: "slider",
@@ -74,6 +74,43 @@ export const operooConfig: CalculatorConfig = {
       step: 1,
       default: 100,
       description: "Includes HR forms, contracts, policies, agreements, etc."
+    },
+    {
+      type: "result",
+      id: "paperCost",
+      label: "Paper Costs @ 1.4c per page",
+      formula: (inputs) => (inputs.students * inputs.pagesStudent) * 0.014
+    },
+    {
+      type: "result",
+      id: "printingCost",
+      label: "Printing/Toner Costs @ 1.2c per page",
+      formula: (inputs) => (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012
+    },
+    {
+      type: "result",
+      id: "maintenanceCost",
+      label: "Printer/Copier Maintenance @ $395 service fee every 50,000 copies",
+      formula: (inputs) => ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395
+    },
+    {
+      type: "result",
+      id: "postageCost",
+      label: "Postage Costs @ 50c per mailout",
+      formula: (inputs) => (inputs.students * inputs.mailoutsStudent) * 0.5
+    },
+    {
+      type: "result",
+      id: "totalCost",
+      label: "Total",
+      isTotal: true,
+      formula: (inputs) => {
+        const paperCost = (inputs.students * inputs.pagesStudent) * 0.014;
+        const printingCost = (inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) * 0.012;
+        const maintenanceCost = ((inputs.students * inputs.pagesStudent + inputs.staff * inputs.pagesStaff) / 50000) * 395;
+        const postageCost = (inputs.students * inputs.mailoutsStudent) * 0.5;
+        return paperCost + printingCost + maintenanceCost + postageCost;
+      }
     }
   ],
   allowedDomains: ["deanlofts.xyz", "*.deanlofts.xyz", "*.operoo.com", "operoo.com"],

@@ -19,47 +19,24 @@
     const containers = document.querySelectorAll('[data-config]');
     
     for (const container of containers) {
-      const configType = container.getAttribute('data-config');
-      
       try {
-        // Fetch calculator HTML
-        const response = await fetch(`https://calc.deanlofts.xyz/calculators/${configType}`);
-        const html = await response.text();
+        // Get calculator config from data attribute if available
+        const configData = container.getAttribute('data-calculator');
+        let config;
         
-        // Extract calculator content
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-        const calculator = doc.querySelector('.max-w-3xl');
-        
-        if (calculator) {
-          // Add widget class and remove Tailwind classes
-          calculator.className = 'calculator-widget';
-          container.innerHTML = calculator.outerHTML;
-
-          // Update HTML structure to match new CSS
-          container.querySelectorAll('.flex.justify-between').forEach(el => {
-            el.className = 'result-row' + (el.querySelector('.font-bold') ? ' total' : '');
-            
-            // Add classes to label and value
-            const label = el.children[0];
-            const value = el.children[1];
-            if (label && value) {
-              label.className = 'result-label';
-              value.className = 'result-value';
-            }
-          });
-          
-          // Add proper slider label structure
-          container.querySelectorAll('input[type="range"]').forEach(slider => {
-            const labels = slider.nextElementSibling;
-            if (labels) {
-              labels.className = 'slider-labels';
-            }
-          });
-
-          // Initialize calculation functionality
-          initializeCalculations(container);
+        if (configData) {
+          // Use embedded config
+          config = JSON.parse(configData);
+        } else {
+          // Fallback to fetching config (for embedded widget use)
+          const configType = container.getAttribute('data-config');
+          const response = await fetch(`https://calc.deanlofts.xyz/calculators/${configType}`);
+          config = await response.json();
         }
+        
+        // Render calculator based on config
+        renderCalculator(container, config);
+        initializeCalculations(container, config);
       } catch (error) {
         console.error('Failed to load calculator:', error);
         container.innerHTML = '<p>Failed to load calculator</p>';
@@ -69,32 +46,107 @@
     window.SchoolStatusCalculator.initialized = true;
   }
 
-  function initializeCalculations(container) {
+  function renderCalculator(container, config) {
+    // Render HTML based on config elements
+    const html = `
+      <div class="calculator-widget">
+        <h1>${config.name}</h1>
+        <p class="subtitle">${config.description}</p>
+        ${renderElements(config.elements)}
+      </div>
+    `;
+    container.innerHTML = html;
+  }
+
+  function renderSlider(element) {
+    return `
+      <div class="input-group">
+        <div class="slider-header">
+          <label for="${element.id}">${element.label}</label>
+          <div class="range-input">
+            <input 
+              type="range"
+              id="${element.id}"
+              min="${element.min}"
+              max="${element.max}"
+              step="${element.step}"
+              value="${element.default}"
+            />
+          </div>
+          <div class="range-values">
+            <span>0</span>
+            <span class="current-value">${element.default}</span>
+            <span>${element.max}</span>
+          </div>
+        </div>
+        ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
+      </div>
+    `;
+  }
+
+  function renderResult(element) {
+    return `
+      <div class="cost-line ${element.isTotal ? 'total' : ''}">
+        <span>${element.label}</span>
+        <span id="${element.id}">$0.00</span>
+      </div>
+    `;
+  }
+
+  function renderElements(elements) {
+    const sliders = elements
+      .filter(element => element.type === 'slider')
+      .map(element => renderSlider(element))
+      .join('');
+
+    const results = `
+      <div class="results">
+        ${elements
+          .filter(element => element.type === 'result')
+          .map(element => renderResult(element))
+          .join('')}
+      </div>
+    `;
+
+    return sliders + results;
+  }
+
+  function initializeCalculations(container, config) {
     function calculateResults() {
-      const students = parseInt(container.querySelector('#students')?.value) || 0;
-      const pagesStudent = parseInt(container.querySelector('#pagesStudent')?.value) || 0;
-      const mailoutsStudent = parseInt(container.querySelector('#mailoutsStudent')?.value) || 0;
-      const staff = parseInt(container.querySelector('#staff')?.value) || 0;
-      const pagesStaff = parseInt(container.querySelector('#pagesStaff')?.value) || 0;
+      // Get all slider values
+      const inputs = {};
+      config.elements
+        .filter(element => element.type === 'slider')
+        .forEach(element => {
+          inputs[element.id] = parseInt(container.querySelector(`#${element.id}`)?.value) || 0;
+        });
 
-      const paperCost = (students * pagesStudent) * 0.014;
-      const printingCost = (students * pagesStudent + staff * pagesStaff) * 0.012;
-      const maintenanceCost = ((students * pagesStudent + staff * pagesStaff) / 50000) * 395;
-      const postageCost = (students * mailoutsStudent) * 0.5;
-      const totalCost = paperCost + printingCost + maintenanceCost + postageCost;
+      // Calculate and update all results
+      config.elements
+        .filter(element => element.type === 'result')
+        .forEach(element => {
+          const result = element.formula(inputs);
+          container.querySelector(`#${element.id}`).textContent = '$' + result.toFixed(2);
+        });
+    }
 
-      container.querySelector('#paperCost').textContent = '$' + paperCost.toFixed(2);
-      container.querySelector('#printingCost').textContent = '$' + printingCost.toFixed(2);
-      container.querySelector('#maintenanceCost').textContent = '$' + maintenanceCost.toFixed(2);
-      container.querySelector('#postageCost').textContent = '$' + postageCost.toFixed(2);
-      container.querySelector('#totalCost').textContent = '$' + totalCost.toFixed(2);
+    function updateSliderBackground(slider) {
+      const value = (slider.value - slider.min) / (slider.max - slider.min) * 100;
+      slider.style.backgroundSize = `${value}% 100%`;
     }
 
     container.querySelectorAll('input[type="range"]').forEach(slider => {
+      // Initialize the background size
+      updateSliderBackground(slider);
+      
       slider.addEventListener('input', function() {
-        if (this.nextElementSibling?.children[1]) {
-          this.nextElementSibling.children[1].textContent = this.value;
+        // Update the output value
+        const valueDisplay = this.parentElement.nextElementSibling.querySelector('.current-value');
+        if (valueDisplay) {
+          valueDisplay.textContent = this.value;
         }
+        // Update the slider fill
+        updateSliderBackground(this);
         calculateResults();
       });
     });
