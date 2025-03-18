@@ -37,7 +37,8 @@
           // Fallback to fetching config (for embedded widget use)
           const configType = container.getAttribute('data-config');
           const response = await fetch(`https://calc.deanlofts.xyz/calculators/${configType}`);
-          config = await response.json();
+          const data = await response.json();
+          config = data;
         }
         
         // Render calculator based on config
@@ -100,7 +101,7 @@
 
   function renderSlider(element) {
     return `
-      <div class="input-group">
+      <div class="input-group slider-group" data-element-id="${element.id}">
         <label for="${element.id}">${element.label}</label>
         ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
         <div class="range-input">
@@ -139,7 +140,7 @@
   function renderCheckbox(element) {
     return `
       <div class="input-group">
-        <label>${element.label}</label>
+        <label for="${element.id}">${element.label}</label>
         ${element.description ? `<p class="helper-text">${element.description}</p>` : ''}
         <div class="checkbox-wrapper">
           <input type="checkbox" id="${element.id}" />
@@ -213,12 +214,18 @@
     // Add event listeners to all input types
     sliders.forEach(slider => {
       slider.addEventListener('input', function() {
-        const valueDisplay = document.getElementById(`${this.id}-value`);
+        const valueDisplay = container.querySelector(`#${this.id}-value`);
         if (valueDisplay) {
           valueDisplay.textContent = this.value;
         }
         calculateResults(container, config);
       });
+      
+      // Trigger initial value display
+      const valueDisplay = container.querySelector(`#${slider.id}-value`);
+      if (valueDisplay) {
+        valueDisplay.textContent = slider.value;
+      }
     });
     
     selects.forEach(select => {
@@ -277,7 +284,8 @@
             // Call the formula function with inputs
             value = result.formula(inputs);
           } catch (error) {
-            console.error('Calculation error:', error);
+            console.error('Calculation error for ' + result.id + ':', error);
+            console.error('Inputs:', inputs);
           }
         }
         
@@ -290,18 +298,16 @@
   }
 
   function formatCurrency(value) {
-    // Format like "1 792 USD" as shown in the screenshot
+    // Format like "$1,792.00" - standard currency format
     const rounded = Math.round(value * 100) / 100;
-    const parts = rounded.toString().split('.');
-    const integerFormatted = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    const formatter = new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
     
-    if (parts.length > 1) {
-      // Add decimal part if it exists
-      const decimal = parts[1].padEnd(2, '0');
-      return `${integerFormatted}.${decimal} USD`;
-    }
-    
-    return `${integerFormatted}.00 USD`;
+    return formatter.format(rounded);
   }
 
   // Initialize when DOM is ready
